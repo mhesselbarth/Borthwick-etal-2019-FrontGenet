@@ -37,11 +37,11 @@ forest_300 <- raster::mask(x = forest_300, mask = boarder_indiana) # clip/mask d
 
 # Plot gis layer with sampling points
 forest_300 %>%
-  raster::as.data.frame(na.rm = T, xy = T) %>% # convert raster to dataframe with xy-coordinates and z-values
+  raster::as.data.frame(na.rm = TRUE, xy = TRUE) %>% # convert raster to dataframe with xy-coordinates and z-values
   ggplot2::ggplot() + # plot data
     ggplot2::geom_raster(aes(x = x, y = y, fill = factor(IN_forest_300m))) + # plot patches with fill according to value
     ggplot2::geom_point(data = tibble::as.tibble(sampling_points), # plot sampling points
-                        aes(x = E, y = N, col = "red"), shape = 19, size = 2) +
+                        aes(x = x, y = y, col = "red"), shape = 19, size = 2) +
     ggplot2::coord_equal() + # ratio of 1:1 of x and y axis
     ggplot2::scale_fill_viridis_d(name = "Landcover", labels = c("Non-forest", "Forest")) + # setting colours of fill
     ggplot2::scale_color_manual(name = "", values = "red", labels = "Sampling points") + # set labels legend
