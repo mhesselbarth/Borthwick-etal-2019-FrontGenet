@@ -1,7 +1,6 @@
 # load libraries
 library(dplyr)
 library(landscapemetrics)
-library(magrittr)
 library(purrr)
 library(raster)
 library(rgdal)

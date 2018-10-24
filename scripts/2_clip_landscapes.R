@@ -315,13 +315,13 @@ lines(1:10000, y.minor, lty = 3)
 # Input data for clipping landscape. This is where we have to throw in 
 # our patch data forest vs non-forest
 
-input_layer <- raster(paste0(getwd(), "/data/intern/GIS/forest_300m_0_1.tif"))
+input_layer <- raster(paste0(getwd(), "/data/GIS/forest_300m_0_1.tif"))
 # input_layer[values(input_layer) < -999] <- NA
 plot(input_layer)
 
 # Read sampling points
 #spoints <- readShapeSpatial(paste0(path, "/GIS_data/Sampling_points/sampling_points.shp"))
-spoints <- raster::shapefile(paste0(getwd(), "/data/intern/GIS/SSR_17_sites.shp"))
+spoints <- raster::shapefile(paste0(getwd(), "/data/GIS/SSR_17_sites.shp"))
 
 ## important !! id: 0 -> 70 
 id <- as.numeric(rownames(spoints@data)) # setting unique id of sampling points
