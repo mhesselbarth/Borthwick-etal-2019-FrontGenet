@@ -13,13 +13,13 @@ names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
 # Calculate landscape-level metrics locally
-# landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm, 
-#                                                      what = "landscape")
-# 
+landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
+                                                     what = "landscape")
+
 # Add name of sites
-# landscape_metrics <- dplyr::mutate(landscape_metrics, 
-#                                    site_a = as.integer(names_clippings[layer, 2]), 
-#                                    site_b = as.integer(names_clippings[layer, 3]))
+landscape_metrics <- dplyr::mutate(landscape_metrics,
+                                   site_a = as.integer(names_clippings[layer, 2]),
+                                   site_b = as.integer(names_clippings[layer, 3]))
 
 # Calculate landscape-level metrics on high performance cluster
 # landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
