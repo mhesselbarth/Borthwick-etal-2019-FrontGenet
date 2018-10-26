@@ -4,7 +4,7 @@ library(landscapemetrics)
 library(raster)
 library(tidyverse)
 
-source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
+# source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
 
 # load the clippings
 clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm.rds"))
@@ -13,13 +13,30 @@ names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
 # Calculate landscape-level metrics locally
-landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
-                                                     what = "landscape")
+# Nicer code but can't print overall progress at the moment...
+# landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
+#                                                      what = "landscape")
+# 
+# # Add name of sites
+# landscape_metrics <- dplyr::mutate(landscape_metrics,
+#                                    site_a = as.integer(names_clippings[layer, 2]),
+#                                    site_b = as.integer(names_clippings[layer, 3]))
 
+# Print progress
+landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
+  
+  cat(paste0("\r> Progress: ", x, " from ", length(clippings_pmm)))
+  
+  landscapemetrics::calculate_lsm(clippings_pmm[[x]], what = "lsm_l_ta", 
+                                  verbose = FALSE)
+})
+ 
 # Add name of sites
-landscape_metrics <- dplyr::mutate(landscape_metrics,
-                                   site_a = as.integer(names_clippings[layer, 2]),
-                                   site_b = as.integer(names_clippings[layer, 3]))
+landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
+  dplyr::mutate(layer = as.integer(layer_bind_rows),
+                site_a = as.integer(names_clippings[layer, 2]),
+                site_b = as.integer(names_clippings[layer, 3])) %>%
+  dplyr::select(-layer_bind_rows)
 
 # Calculate landscape-level metrics on high performance cluster
 # landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
@@ -55,7 +72,12 @@ landscape_metrics <- dplyr::mutate(landscape_metrics,
   dplyr::arrange(site_a, site_b)
 
 # Order and save results
+UtilityFunctions::save_rds(object = landscape_metrics, 
+                          filename = "landscape_metrics.rds", 
+                          path = paste0(getwd(), "/data/output"), 
+                          overwrite = FALSE)
+
 write.table(landscape_metrics_df,
-            file = paste0(getwd(), '/data/output/landscape_metrics.csv'), 
+            file = paste0(getwd(), '/data/output/landscape_metrics.csv'),
             sep = ";", dec = ".",
             row.names = FALSE)
