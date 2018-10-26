@@ -22,8 +22,10 @@ range(raster_values)
 breaks <- c(-4.6876998, -2.7545104, 0.2864172, 6.5807652)                     # 3 classes
 # breaks <- c(-4.687700, -3.188930, -1.102762, 0.156716, 1.721571, 6.580765)  # 5 classes
 
+# Cut the values into classes
 raster_values_df <- tibble::tibble(value = raster_values)
 
+# For some reason the highest value is NA, I guess because of rounding issues
 raster_values_df <- dplyr::mutate(raster_values_df, class = cut(raster_values_df$value,
                                                                 breaks = breaks,
                                                                 labels = c("low", "medium", "high"),
