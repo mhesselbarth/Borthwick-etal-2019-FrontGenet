@@ -27,7 +27,7 @@ landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
   
   cat(paste0("\r> Progress: ", x, " from ", length(clippings_pmm)))
   
-  landscapemetrics::calculate_lsm(clippings_pmm[[x]], what = "lsm_l_ta", 
+  landscapemetrics::calculate_lsm(clippings_pmm[[x]], what = c("class", "landscape"), 
                                   verbose = FALSE)
 })
  
