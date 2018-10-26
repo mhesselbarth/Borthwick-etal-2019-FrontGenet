@@ -1,9 +1,8 @@
 
 # Import libraries
-library(ggplot2)
-library(magrittr)
 library(raster)
 library(sp)
+library(tidyverse)
 
 # Import sampling points
 sampling_points <- getwd() %>% # path to folder containing GIS data
@@ -35,6 +34,11 @@ forest_cover_30 <- getwd() %>%
 forest_300[is.na(forest_300)] <- 0 # Set NA values to 0, because there are NAs inside the state
 forest_300 <- raster::mask(x = forest_300, mask = boarder_indiana) # clip/mask data only to the state boarder
 
+# Import habitat surface
+habitat_surface <- getwd() %>% 
+  paste0("/data/GIS/habitat_surface.tif") %>%
+  raster::raster()
+
 # Plot gis layer with sampling points
 forest_300 %>%
   raster::as.data.frame(na.rm = TRUE, xy = TRUE) %>% # convert raster to dataframe with xy-coordinates and z-values
@@ -49,4 +53,18 @@ forest_300 %>%
     ggplot2::theme_classic() + # overall appearance of the plot
     ggplot2::theme(axis.text=element_blank(), # remove xy-coordinates from axis (not very informative)
                    axis.ticks=element_blank())
+
+habitat_surface %>%
+  raster::as.data.frame(na.rm = TRUE, xy = TRUE) %>% # convert raster to dataframe with xy-coordinates and z-values
+  ggplot2::ggplot() + # plot data
+  ggplot2::geom_raster(aes(x = x, y = y, fill = habitat_surface)) + # plot patches with fill according to value
+  ggplot2::geom_point(data = tibble::as.tibble(sampling_points), # plot sampling points
+                      aes(x = x, y = y, col = "red"), shape = 19, size = 2) +
+  ggplot2::coord_equal() + # ratio of 1:1 of x and y axis
+  ggplot2::scale_fill_viridis_c(name = "Habitat quality") + # setting colours of fill
+  ggplot2::scale_color_manual(name = "", values = "red", labels = "Sampling points") + # set labels legend
+  ggplot2::labs(x = "x coordinate", y = "y-coordinate", title = "Habitat quality") + # set labels axis
+  ggplot2::theme_classic() + # overall appearance of the plot
+  ggplot2::theme(axis.text=element_blank(), # remove xy-coordinates from axis (not very informative)
+                 axis.ticks=element_blank())
 

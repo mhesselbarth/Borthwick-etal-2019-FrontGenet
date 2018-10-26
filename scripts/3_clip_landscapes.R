@@ -315,8 +315,10 @@ lines(1:10000, y.minor, lty = 3)
 # Input data for clipping landscape. This is where we have to throw in 
 # our patch data forest vs non-forest
 
-input_layer <- raster(paste0(getwd(), "/data/GIS/forest_300m_0_1.tif"))
+# input_layer <- raster(paste0(getwd(), "/data/GIS/forest_300m_0_1.tif"))
 # input_layer[values(input_layer) < -999] <- NA
+input_layer <- readRDS(paste0(getwd(), "/data/output/habitat_surface_pmm.rds"))
+
 plot(input_layer)
 
 # Read sampling points
@@ -407,6 +409,6 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
 clippings_flatten <- purrr::flatten(clippings)
 
 UtilityFunctions::save_rds(clippings_flatten, filename = "clippings_pmm.rds", 
-                           path = paste0(getwd(), "/data/export/output"), 
-                           overwrite = FALSE)
+                           path = paste0(getwd(), "/data/output"), 
+                           overwrite = TRUE)
 
