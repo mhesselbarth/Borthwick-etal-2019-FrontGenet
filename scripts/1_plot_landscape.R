@@ -40,7 +40,7 @@ habitat_surface <- getwd() %>%
   raster::raster()
 
 # Plot gis layer with sampling points
-forest_300 %>%
+ggplot_forest <- forest_300 %>%
   raster::as.data.frame(na.rm = TRUE, xy = TRUE) %>% # convert raster to dataframe with xy-coordinates and z-values
   ggplot2::ggplot() + # plot data
     ggplot2::geom_raster(aes(x = x, y = y, fill = factor(IN_forest_300m))) + # plot patches with fill according to value
@@ -54,7 +54,7 @@ forest_300 %>%
     ggplot2::theme(axis.text=element_blank(), # remove xy-coordinates from axis (not very informative)
                    axis.ticks=element_blank())
 
-habitat_surface %>%
+ggplot_habitat_surface <- habitat_surface %>%
   raster::as.data.frame(na.rm = TRUE, xy = TRUE) %>% # convert raster to dataframe with xy-coordinates and z-values
   ggplot2::ggplot() + # plot data
   ggplot2::geom_raster(aes(x = x, y = y, fill = habitat_surface)) + # plot patches with fill according to value
@@ -67,4 +67,18 @@ habitat_surface %>%
   ggplot2::theme_classic() + # overall appearance of the plot
   ggplot2::theme(axis.text=element_blank(), # remove xy-coordinates from axis (not very informative)
                  axis.ticks=element_blank())
+
+
+# Save results
+overwrite <- FALSE
+
+UtilityFunctions::save_ggplot(plot = ggplot_forest, 
+                              filename = "ggplot_forest.png", 
+                              path = paste0(getwd(), "/plots"), 
+                              overwrite = overwrite)
+
+UtilityFunctions::save_ggplot(plot = ggplot_habitat_surface, 
+                              filename = "ggplot_habitat_surface.png", 
+                              path = paste0(getwd(), "/plots"), 
+                              overwrite = overwrite)
 

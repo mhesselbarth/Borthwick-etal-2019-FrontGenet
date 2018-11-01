@@ -84,10 +84,10 @@ UtilityFunctions::save_rds(object = habitat_surface_pmm,
 
 UtilityFunctions::save_ggplot(plot = ggplot_histogramm, 
                               filename = "ggplot_histogramm.png", 
-                              path = paste0(getwd(), "/data/plots"), 
+                              path = paste0(getwd(), "/plots"), 
                               overwrite = overwrite)
 
 UtilityFunctions::save_ggplot(plot = ggplot_comparison, 
                               filename = "ggplot_comparison.png", 
-                              path = paste0(getwd(), "/data/plots"), 
+                              path = paste0(getwd(), "/plots"), 
                               overwrite = overwrite)
