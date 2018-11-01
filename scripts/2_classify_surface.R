@@ -72,7 +72,7 @@ ggplot_pmm <- ggplot2::ggplot(data = raster::as.data.frame(habitat_surface_pmm,
   ggplot2::theme(axis.text=element_blank(), # remove xy-coordinates from axis (not very informative)
                  axis.ticks=element_blank())
 
-ggplot_comparison <- ggplot_surface + ggplot_pmm
+ggplot_surface_vs_pmm <- ggplot_surface + ggplot_pmm
 
 # Save output
 overwrite <- FALSE
@@ -87,7 +87,7 @@ UtilityFunctions::save_ggplot(plot = ggplot_histogramm,
                               path = paste0(getwd(), "/plots"), 
                               overwrite = overwrite)
 
-UtilityFunctions::save_ggplot(plot = ggplot_comparison, 
-                              filename = "ggplot_comparison.png", 
+UtilityFunctions::save_ggplot(plot = ggplot_surface_vs_pmm, 
+                              filename = "ggplot_surface_vs_pmm.png", 
                               path = paste0(getwd(), "/plots"), 
                               overwrite = overwrite)

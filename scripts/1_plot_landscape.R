@@ -1,5 +1,7 @@
 
 # Import libraries
+library(patchwork) # devtools::install_github("thomasp85/patchwork")
+library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions")
 library(raster)
 library(sp)
 library(tidyverse)
@@ -68,17 +70,13 @@ ggplot_habitat_surface <- habitat_surface %>%
   ggplot2::theme(axis.text=element_blank(), # remove xy-coordinates from axis (not very informative)
                  axis.ticks=element_blank())
 
+ggplot_surface_forest <- ggplot_habitat_surface + ggplot_forest
 
 # Save results
 overwrite <- FALSE
 
-UtilityFunctions::save_ggplot(plot = ggplot_forest, 
-                              filename = "ggplot_forest.png", 
-                              path = paste0(getwd(), "/plots"), 
-                              overwrite = overwrite)
-
-UtilityFunctions::save_ggplot(plot = ggplot_habitat_surface, 
-                              filename = "ggplot_habitat_surface.png", 
+UtilityFunctions::save_ggplot(plot = ggplot_surface_forest, 
+                              filename = "ggplot_surface_forest.png", 
                               path = paste0(getwd(), "/plots"), 
                               overwrite = overwrite)
 
