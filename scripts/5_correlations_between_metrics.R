@@ -1,5 +1,6 @@
 # load packages
 library(ggplot2)
+library(landscapemetrics)
 library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions")
 library(tidyverse)
 
@@ -41,10 +42,10 @@ correlation_matrix_landscape_df <- tibble::tibble(
 # remove all NA cases
 correlation_landscape <- correlation_matrix_landscape_df[complete.cases(correlation_matrix_landscape_df),]
 
-dplyr::filter(correlation_landscape, value < 0.5)
+dplyr::filter(correlation_landscape, value < 0.1 & value > -0.1)
 
 # Save plots
-overwrite <- TRUE
+overwrite <- FALSE
 
 UtilityFunctions::save_ggplot(plot = ggplot_correlation_landscape, 
                               filename = "ggplot_correlation_landscape.png", 
