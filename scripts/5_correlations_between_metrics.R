@@ -1,11 +1,10 @@
 # load packages
-library(ggplot2)
 library(landscapemetrics)
 library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions")
 library(tidyverse)
 
 # import data
-landscapemetrics <- readr::read_rds(paste0(getwd(), "/data/output/landscape_metrics.rds"))
+landscape_metrics <- readr::read_rds(paste0(getwd(), "/data/output/landscape_metrics.rds"))
 
 # Split class level and landscape level
 class_level <- dplyr::filter(landscapemetrics, level == "class")
