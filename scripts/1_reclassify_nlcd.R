@@ -1,10 +1,7 @@
 library(gridExtra)
-library(landscapetools)
-library(lattice)
 library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions") - only needed to save data
 library(raster)
 library(rasterVis)
-library(sp)
 library(tidyverse)
 
 # Import GIS layer
@@ -20,7 +17,7 @@ nlcd_reclassified <- nlcd
 # forest habitat
 raster::values(nlcd_reclassified)[raster::values(nlcd_reclassified) %in% c(41, 42, 43)] <- 1
 # complementary habitat
-raster::values(nlcd_reclassified)[raster::values(nlcd_reclassified) %in% c(52, 61, 71, 81)] <- 2
+raster::values(nlcd_reclassified)[raster::values(nlcd_reclassified) %in% c(52, 71, 81)] <- 2
 # non-habitat
 raster::values(nlcd_reclassified)[!raster::values(nlcd_reclassified) %in% c(1, 2) & 
                                     !is.na(raster::values(nlcd_reclassified))] <- 3
@@ -37,16 +34,13 @@ raster::values(nlcd_reclassified) <- factor(raster::values(nlcd_reclassified),
                                             levels = c(1, 2, 3), 
                                             labels = c("forest", "complementary", "non-habitat"))
 
+# Save results
+UtilityFunctions::save_rds(object = nlcd, 
+                           filename = "nlcd.rds", 
+                           path = paste0(getwd(), "/data/output"), 
+                           overwrite = FALSE)
 
-# plot both maps
-plot_nlcd <- rasterVis::levelplot(nlcd, main = "NLCD")
-plot_nlcd_reclass <- rasterVis::levelplot(nlcd_reclassified, main = "NLCD reclassified")
-
-plot_nlcd_overall <- gridExtra::grid.arrange(plot_nlcd, 
-                                             plot_nlcd_reclass, ncol = 2)
-
-plot(plot_nlcd_overall)
-
+# Save results
 UtilityFunctions::save_rds(object = nlcd_reclassified, 
                            filename = "nlcd_reclassified.rds", 
                            path = paste0(getwd(), "/data/output"), 
