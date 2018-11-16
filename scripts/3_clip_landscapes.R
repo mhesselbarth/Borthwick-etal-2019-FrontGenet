@@ -317,7 +317,7 @@ lines(1:10000, y.minor, lty = 3)
 
 # input_layer <- raster(paste0(getwd(), "/data/GIS/forest_300m_0_1.tif"))
 # input_layer[values(input_layer) < -999] <- NA
-input_layer <- readRDS(paste0(getwd(), "/data/output/habitat_surface_pmm.rds"))
+input_layer <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified.rds"))
 
 plot(input_layer)
 
@@ -408,7 +408,7 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
 
 clippings_flatten <- purrr::flatten(clippings)
 
-UtilityFunctions::save_rds(clippings_flatten, filename = "clippings_pmm.rds", 
+UtilityFunctions::save_rds(clippings_flatten, filename = "clippings_pmm_nlcd.rds", 
                            path = paste0(getwd(), "/data/output"), 
-                           overwrite = TRUE)
+                           overwrite = FALSE)
 
