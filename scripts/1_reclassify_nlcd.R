@@ -7,32 +7,38 @@ library(tidyverse)
 # Import GIS layer
 nlcd <- raster::raster(paste0(getwd(), "/data/GIS/nlcd_in.tif"))
 
+# convert values to factor
+nlcd <- raster::ratify(nlcd)
+
 # show all unique landcover classes 
 # sort(unique(raster::values(nlcd)))
+
+# add classes of NLCD
+levels_nlcd <- levels(nlcd)[[1]]
+levels_nlcd$class <- c("water", "urban", "residential (lo)", "residential (hi)", "commercial", 
+                       "rock", "forest (d)", "forest (e)", "forest (m)", "shrub", "grass",
+                       "pasture", "crops", "wetlands (w)", "wetlands (h)", "NA")
+
+# add RAT to raster
+levels(nlcd) <- levels_nlcd
 
 # new raster to reclassify
 nlcd_reclassified <- nlcd
 
 # reclassify land-cover classes
-# forest habitat
-raster::values(nlcd_reclassified)[raster::values(nlcd_reclassified) %in% c(41, 42, 43)] <- 1
-# complementary habitat
-raster::values(nlcd_reclassified)[raster::values(nlcd_reclassified) %in% c(52, 71, 81)] <- 2
-# non-habitat
-raster::values(nlcd_reclassified)[!raster::values(nlcd_reclassified) %in% c(1, 2) & 
-                                    !is.na(raster::values(nlcd_reclassified))] <- 3
+nlcd_reclassified[nlcd_reclassified %in% c(41, 42, 43)] <- 1 # forest habitat
+nlcd_reclassified[nlcd_reclassified %in% c(52, 71, 81)] <- 2 # complementary habitat
+nlcd_reclassified[!nlcd_reclassified %in% c(1, 2) & !is.na(nlcd_reclassified)] <- 3 # non-habitat
 
-# convert to factor
-raster::values(nlcd) <- factor(raster::values(nlcd), 
-                               levels = c(11, 21, 22, 23, 24, 31, 41, 42, 43, 52, 71, 81, 82, 90, 95, 127), 
-                               labels = c("water", "urban", "residential (lo)", "residential (hi)", "commercial", 
-                                          "rock", "forest (d)", "forest (e)", "forest (m)", "shrub", "grass",
-                                          "pasture", "crops", "wetlands (w)", "wetlands (h)", "NA"))
+# convert values to factor
+nlcd_reclassified <- raster::ratify(nlcd_reclassified)
 
-# convert to factor
-raster::values(nlcd_reclassified) <- factor(raster::values(nlcd_reclassified), 
-                                            levels = c(1, 2, 3), 
-                                            labels = c("forest", "complementary", "non-habitat"))
+# add classes of reclassification
+levels_nlcd_reclassified <- levels(nlcd_reclassified)[[1]]
+levels_nlcd_reclassified$class <- c("forest", "complementary", "non-habitat")
+
+# add RAT to raster
+levels(nlcd_reclassified) <- levels_nlcd_reclassified
 
 # Save results
 UtilityFunctions::save_rds(object = nlcd, 
