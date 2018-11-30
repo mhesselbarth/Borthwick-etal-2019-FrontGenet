@@ -7,7 +7,7 @@ library(tidyverse)
 source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
 
 # load the clippings
-clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm.rds"))
+clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
 
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
@@ -41,7 +41,7 @@ names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify =
 # Calculate landscape-level metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   landscape = clippings_pmm,
-                                  const = list(what = c("class", "landscape"),
+                                  const = list(level = c("class", "landscape"),
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
                                   template = list(queue = "mpi",
