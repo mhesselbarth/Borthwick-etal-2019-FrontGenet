@@ -12,6 +12,15 @@ clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
+metrics <- landscapemetrics::list_lsm(level = c("class", "landscape"), simplify = TRUE)
+
+metrics <- metrics[!metrics %in% c("lsm_c_contig_mn", 
+                                   "lsm_c_contig_sd", 
+                                   "lsm_c_contig_cv",
+                                   "lsm_l_contig_mn", 
+                                   "lsm_l_contig_sd", 
+                                   "lsm_l_contig_cv")]
+
 # # Calculate landscape-level metrics locally
 # # Nicer code but can't print overall progress at the moment...
 # landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
@@ -41,11 +50,11 @@ names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify =
 # Calculate landscape-level metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   landscape = clippings_pmm,
-                                  const = list(level = c("class", "landscape"),
+                                  const = list(what = metrics,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
-                                  template = list(queue = "mpi",
-                                                  walltime = "48:00",
+                                  template = list(queue = "mpi-long",
+                                                  walltime = "120:00",
                                                   processes = 1))
 
 # Rowbind returning list and add site names
