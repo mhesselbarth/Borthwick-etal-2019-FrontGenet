@@ -9,48 +9,50 @@ source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
 # load the clippings
 clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
 
+# check if all rasters all loaded in memory
+all(purrr::map_lgl(clippings_pmm, raster::inMemory))
+
+# extract names
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
-metrics <- landscapemetrics::list_lsm(level = c("class", "landscape"), simplify = TRUE)
+class <- c("lsm_c_ai", "lsm_c_cai_mn", "lsm_c_clumpy", "lsm_c_cohesion", 
+           "lsm_c_division", "lsm_c_ed", "lsm_c_iji", "lsm_c_lpi", "lsm_c_lsi", 
+           "lsm_c_mesh", "lsm_c_pd", "lsm_c_pladj", "lsm_c_pland", "lsm_c_split")
 
-metrics <- metrics[!metrics %in% c("lsm_c_contig_mn", 
-                                   "lsm_c_contig_sd", 
-                                   "lsm_c_contig_cv",
-                                   "lsm_l_contig_mn", 
-                                   "lsm_l_contig_sd", 
-                                   "lsm_l_contig_cv")]
+landscape <- c("lsm_l_ai", "lsm_l_cohesion", "lsm_l_condent", "lsm_l_contag", 
+               "lsm_l_division", "lsm_l_ed", "lsm_l_ent", "lsm_l_joinent", "lsm_l_lpi", 
+               "lsm_l_lsi", "lsm_l_mesh", "lsm_l_mutinf", "lsm_l_pd", 
+               "lsm_l_pladj", "lsm_l_prd", "lsm_l_shdi", "lsm_l_shei", "lsm_l_split")
+
+what <- c(class, landscape)
+
+# what <- landscapemetrics::list_lsm(level = c("class", "landscape"),
+#                                    simplify = TRUE)
+# 
+# what <- what[!what %in% c("lsm_c_contig_mn",
+#                           "lsm_c_contig_sd",
+#                           "lsm_c_contig_cv",
+#                           "lsm_l_contig_mn",
+#                           "lsm_l_contig_sd",
+#                           "lsm_l_contig_cv")]
 
 # # Calculate landscape-level metrics locally
 # # Nicer code but can't print overall progress at the moment...
 # landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
-#                                                      what = c("class", "landscape"))
+#                                                      what = metrics, 
+#                                                      classes_max = 3)
 # 
 # # Add name of sites
 # landscape_metrics <- dplyr::mutate(landscape_metrics,
 #                                    site_a = as.integer(names_clippings[layer, 2]),
 #                                    site_b = as.integer(names_clippings[layer, 3]))
 # 
-# # Print progress
-# landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
-# 
-#   cat(paste0("\r> Progress: ", x, " from ", length(clippings_pmm)))
-# 
-#   landscapemetrics::calculate_lsm(clippings_pmm[[x]], what = c("class", "landscape"),
-#                                   verbose = FALSE)
-# })
-# 
-# # Add name of sites
-# landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
-#   dplyr::mutate(layer = as.integer(layer_bind_rows),
-#                 site_a = as.integer(names_clippings[layer, 2]),
-#                 site_b = as.integer(names_clippings[layer, 3])) %>%
-#   dplyr::select(-layer_bind_rows)
 # 
 # Calculate landscape-level metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   landscape = clippings_pmm,
-                                  const = list(what = metrics,
+                                  const = list(what = what,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
                                   template = list(queue = "mpi-long",
@@ -83,9 +85,9 @@ landscape_metrics <- dplyr::mutate(landscape_metrics,
 
 # Order and save results
 UtilityFunctions::save_rds(object = landscape_metrics, 
-                          filename = "landscape_metrics.rds", 
-                          path = paste0(getwd(), "/data/output"), 
-                          overwrite = FALSE)
+                           filename = "landscape_metrics.rds", 
+                           path = paste0(getwd(), "/data/output"), 
+                           overwrite = FALSE)
 
 write.table(landscape_metrics,
             file = paste0(getwd(), '/data/output/landscape_metrics.csv'),
