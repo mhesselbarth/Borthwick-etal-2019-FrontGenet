@@ -395,6 +395,8 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
     Elands  <- crop(input_layer, Epolygon)
     Elands <- mask(Elands, Epolygon) # Crop to extend of Emask
     
+    Elands <- readAll(Elands) # make sure read to memory
+    
     names(Elands) <- paste0("comparison_", focal_plot, "_", other_plot)
     
     return(Elands)
