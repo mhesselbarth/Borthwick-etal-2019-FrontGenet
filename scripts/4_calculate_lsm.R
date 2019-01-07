@@ -55,8 +55,8 @@ landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   const = list(what = what,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
-                                  template = list(queue = "mpi-long",
-                                                  walltime = "120:00",
+                                  template = list(queue = "mpi",
+                                                  walltime = "48:00",
                                                   processes = 1))
 
 # Rowbind returning list and add site names
