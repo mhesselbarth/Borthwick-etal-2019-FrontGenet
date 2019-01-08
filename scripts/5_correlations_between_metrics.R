@@ -7,17 +7,17 @@ library(tidyverse)
 landscape_metrics <- readr::read_rds(paste0(getwd(), "/data/output/landscape_metrics.rds"))
 
 # Split class level and landscape level
-class_level <- dplyr::filter(landscapemetrics, level == "class")
-landscape_level <- dplyr::filter(landscapemetrics, level == "landscape")
+class_level <- dplyr::filter(landscape_metrics, level == "class")
+landscape_level <- dplyr::filter(landscape_metrics, level == "landscape")
 
 # plot correlations
-# ggplot_correlation_class <- landscapemetrics::show_correlation(class_level)
+ggplot_correlation_class <- landscapemetrics::show_correlation(class_level)
 
 ggplot_correlation_landscape <- landscapemetrics::show_correlation(landscape_level)
 
 # convert to wide format
 metrics_landscape_wide <- stats::xtabs(value ~ layer + metric,
-                                       data = landscapemetrics[, c(1, 5:6)])
+                                       data = landscape_metrics[, c(1, 5:6)])
 
 # attr(metrics_landscape_wide, "landscape") <- NULL
 # attr(metrics_landscape_wide, "call") <- NULL
@@ -45,6 +45,12 @@ dplyr::filter(correlation_landscape, value < 0.1 & value > -0.1)
 
 # Save plots
 overwrite <- FALSE
+
+UtilityFunctions::save_ggplot(plot = ggplot_correlation_class, 
+                              filename = "ggplot_correlation_class.png", 
+                              path = paste0(getwd(), "/plots"), 
+                              width = 35, height = 35, units = "cm",
+                              overwrite = overwrite)
 
 UtilityFunctions::save_ggplot(plot = ggplot_correlation_landscape, 
                               filename = "ggplot_correlation_landscape.png", 

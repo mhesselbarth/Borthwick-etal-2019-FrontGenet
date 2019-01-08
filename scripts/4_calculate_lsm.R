@@ -16,14 +16,19 @@ all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
-class <- c("lsm_c_ai", "lsm_c_cai_mn", "lsm_c_clumpy", "lsm_c_cohesion", 
-           "lsm_c_division", "lsm_c_ed", "lsm_c_iji", "lsm_c_lpi", "lsm_c_lsi", 
-           "lsm_c_mesh", "lsm_c_pd", "lsm_c_pladj", "lsm_c_pland", "lsm_c_split")
+class <- c("lsm_c_ai", "lsm_c_area_mn", "lsm_c_ca", "lsm_c_cai_mn", "lsm_c_clumpy", 
+           "lsm_c_cohesion", "lsm_c_core_mn", "lsm_c_cpland", "lsm_c_division", 
+           "lsm_c_ed", "lsm_c_frac_mn", "lsm_c_iji", "lsm_c_lpi", "lsm_c_lsi", 
+           "lsm_c_mesh", "lsm_c_np", "lsm_c_para_mn", "lsm_c_pd", "lsm_c_pladj", 
+           "lsm_c_pland", "lsm_c_split", "lsm_c_te")
 
-landscape <- c("lsm_l_ai", "lsm_l_cohesion", "lsm_l_condent", "lsm_l_contag", 
-               "lsm_l_division", "lsm_l_ed", "lsm_l_ent", "lsm_l_joinent", "lsm_l_lpi", 
-               "lsm_l_lsi", "lsm_l_mesh", "lsm_l_mutinf", "lsm_l_pd", 
-               "lsm_l_pladj", "lsm_l_prd", "lsm_l_shdi", "lsm_l_shei", "lsm_l_split")
+landscape <- c("lsm_l_ai", "lsm_l_area_mn", "lsm_l_cai_mn", "lsm_l_cohesion", 
+               "lsm_l_condent", "lsm_l_contag", "lsm_l_core_mn", "lsm_l_division", 
+               "lsm_l_ed", "lsm_l_ent", "lsm_l_frac_mn", "lsm_l_iji", "lsm_l_joinent",
+               "lsm_l_lpi", "lsm_l_lsi", "lsm_l_mesh", "lsm_l_mutinf", "lsm_l_np", 
+               "lsm_l_para_mn", "lsm_l_pd", "lsm_l_pladj", "lsm_l_pr", "lsm_l_prd", 
+               "lsm_l_rpr", "lsm_l_shdi", "lsm_l_shei", "lsm_l_split", "lsm_l_ta", 
+               "lsm_l_te")
 
 what <- c(class, landscape)
 
