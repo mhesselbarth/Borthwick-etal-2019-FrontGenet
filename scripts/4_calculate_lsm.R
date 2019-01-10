@@ -32,18 +32,7 @@ landscape <- c("lsm_l_ai", "lsm_l_area_mn", "lsm_l_cai_mn", "lsm_l_cohesion",
 
 what <- c(class, landscape)
 
-# what <- landscapemetrics::list_lsm(level = c("class", "landscape"),
-#                                    simplify = TRUE)
-# 
-# what <- what[!what %in% c("lsm_c_contig_mn",
-#                           "lsm_c_contig_sd",
-#                           "lsm_c_contig_cv",
-#                           "lsm_l_contig_mn",
-#                           "lsm_l_contig_sd",
-#                           "lsm_l_contig_cv")]
-
-# # Calculate landscape-level metrics locally
-# # Nicer code but can't print overall progress at the moment...
+# # Calculate metrics locally
 # landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
 #                                                      what = metrics, 
 #                                                      classes_max = 3)
@@ -52,9 +41,20 @@ what <- c(class, landscape)
 # landscape_metrics <- dplyr::mutate(landscape_metrics,
 #                                    site_a = as.integer(names_clippings[layer, 2]),
 #                                    site_b = as.integer(names_clippings[layer, 3]))
+
+# Calculate metrics locally but overall printing progress
+# landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
 # 
+#   print(paste0("Progress: ", x, " from ", length(clippings_pmm)))
 # 
-# Calculate landscape-level metrics on high performance cluster
+#   calculate_lsm(landscape = clippings_pmm[[x]],
+#                 what = what,
+#                 classes_max = 3,
+#                 verbose = FALSE,
+#                 progress = FALSE)
+# })
+
+# Calculate metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   landscape = clippings_pmm,
                                   const = list(what = what,
@@ -98,3 +98,34 @@ write.table(landscape_metrics,
             file = paste0(getwd(), '/data/output/landscape_metrics.csv'),
             sep = ";", dec = ".",
             row.names = FALSE)
+
+# FUTURE for HPC
+# load the packages
+library("future")
+library("future.batchtools")
+library("furrr")
+
+# now we specify a future topology that fits our HPC
+# login node -> cluster nodes -> core/ multiple cores
+login <- future::tweak(remote, workers = "gwdu103.gwdg.de",
+                       user = "hesselbarth3")
+
+bsub <- future::tweak(batchtools_lsf, template = "lsf.tmpl",
+                      resources = list(job.name = "lsm_clippings",
+                                       log.file = "lsm_clippings.log",
+                                       queue = "mpi",
+                                       walltime = "48:00",
+                                       processes = 1)) # hpc -> nodes
+
+future::plan(list(login, bsub, future::sequential)) # how to run on nodes, could also be sequential
+
+landscape_metrics %<-% furrr::future_map(clippings_pmm, function(x) {
+  
+  calculate_lsm(landscape = x,
+                what = what,
+                classes_max = 3,
+                verbose = FALSE,
+                progress = FALSE)
+})
+
+# future::resolved(future::futureOf(landscape_metrics))
