@@ -26,7 +26,7 @@ class <- c("lsm_c_ai",
            "lsm_c_division", 
            "lsm_c_iji", 
            "lsm_c_lpi", 
-           "lsm_c_lsi", 
+           # "lsm_c_lsi", # quite slow
            "lsm_c_mesh", 
            "lsm_c_np", 
            "lsm_c_pd", 
@@ -92,8 +92,8 @@ landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   const = list(what = what,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
-                                  template = list(queue = "mpi",
-                                                  walltime = "48:00",
+                                  template = list(queue = "fat",
+                                                  walltime = "06:00",
                                                   processes = 1))
 
 # Rowbind returning list and add site names
