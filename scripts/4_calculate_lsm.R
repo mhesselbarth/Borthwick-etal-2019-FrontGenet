@@ -26,7 +26,7 @@ class <- c("lsm_c_ai",
            "lsm_c_division", 
            "lsm_c_iji", 
            "lsm_c_lpi", 
-           # "lsm_c_lsi", # quite slow
+           "lsm_c_lsi",
            "lsm_c_mesh", 
            "lsm_c_np", 
            "lsm_c_pd", 
