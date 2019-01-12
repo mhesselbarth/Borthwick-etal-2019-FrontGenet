@@ -26,7 +26,7 @@ class <- c("lsm_c_ai",
            "lsm_c_division", 
            "lsm_c_iji", 
            "lsm_c_lpi", 
-           "lsm_c_lsi",
+           # "lsm_c_lsi",
            "lsm_c_mesh", 
            "lsm_c_np", 
            "lsm_c_pd", 
@@ -98,10 +98,10 @@ landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                                   walltime = "06:00",
                                                   processes = 1))
 
-# UtilityFunctions::save_rds(object = landscape_metrics, 
-#                            filename = "landscape_metrics_raw.rds", 
-#                            path = paste0(getwd(), "/data/output"), 
-#                            overwrite = FALSE)
+# UtilityFunctions::save_rds(object = landscape_metrics,
+#                            filename = "landscape_metrics_raw.rds",
+#                            path = paste0(getwd(), "/data/output"),
+#                            overwrite = TRUE)
 
 # Rowbind returning list and add site names
 landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
