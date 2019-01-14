@@ -337,7 +337,7 @@ dist.m <- as.matrix(dist(spoints@coords, method = "euclidean",
                          diag = TRUE, upper = TRUE)) 
 
 # save all to disk or not
-to_disk <- TRUE
+to_disk <- FALSE
 rasterOptions(todisk = to_disk)
 
 # Loop for all sampling points
