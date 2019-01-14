@@ -336,6 +336,8 @@ plot(spoints, add = TRUE, pch = 1) # plot
 dist.m <- as.matrix(dist(spoints@coords, method = "euclidean", 
                          diag = TRUE, upper = TRUE)) 
 
+to_disk <- FALSE
+
 # Loop for all sampling points
 clippings <- purrr::map(1:length(id), function(focal_plot) {
 
@@ -395,7 +397,9 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
     Elands  <- crop(input_layer, Epolygon)
     Elands <- mask(Elands, Epolygon) # Crop to extend of Emask
     
-    Elands <- readAll(Elands) # make sure read to memory
+    if(!to_disk){
+      Elands <- readAll(Elands) # make sure read to memory
+    }
     
     names(Elands) <- paste0("comparison_", focal_plot, "_", other_plot)
     
