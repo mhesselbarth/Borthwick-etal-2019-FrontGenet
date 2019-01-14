@@ -336,7 +336,9 @@ plot(spoints, add = TRUE, pch = 1) # plot
 dist.m <- as.matrix(dist(spoints@coords, method = "euclidean", 
                          diag = TRUE, upper = TRUE)) 
 
-to_disk <- FALSE
+# save all to disk or not
+to_disk <- TRUE
+rasterOptions(todisk = to_disk)
 
 # Loop for all sampling points
 clippings <- purrr::map(1:length(id), function(focal_plot) {
