@@ -9,8 +9,13 @@ source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
 # load the clippings
 clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
 
+clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd_disk.rds"))
+
+
 # check if all rasters all loaded in memory
 all(purrr::map_lgl(clippings_pmm, raster::inMemory))
+
+!all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 
 # extract names
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
@@ -26,7 +31,7 @@ class <- c("lsm_c_ai",
            "lsm_c_division", 
            "lsm_c_iji", 
            "lsm_c_lpi", 
-           # "lsm_c_lsi",
+           "lsm_c_lsi",
            "lsm_c_mesh", 
            "lsm_c_np", 
            "lsm_c_pd", 
@@ -72,21 +77,23 @@ what <- c(class, landscape)
 #                                                      classes_max = 3)
 # 
 # # Calculate metrics locally but overall printing progress
-# landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
-# 
-#   print(paste0("Progress: ", x, " from ", length(clippings_pmm)))
-# 
-#   calculate_lsm(landscape = clippings_pmm[[x]],
-#                 what = what,
-#                 classes_max = 3,
-#                 verbose = FALSE,
-#                 progress = FALSE)
-# })
-# 
-# # Add name of sites
-# landscape_metrics <- dplyr::mutate(landscape_metrics,
-#                                    site_a = as.integer(names_clippings[layer, 2]),
-#                                    site_b = as.integer(names_clippings[layer, 3]))
+
+total_clippigings <- length(clippings_pmm)
+
+landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
+
+  print(paste0("Progress: ", x, " from ", total_clippigings))
+
+  result <- calculate_lsm(landscape = clippings_pmm[[x]],
+                          what = what,
+                          classes_max = 3,
+                          verbose = FALSE,
+                          progress = FALSE)
+  
+  gc(verbose = FALSE, reset = TRUE, full = TRUE)
+  
+  return(result)
+})
 
 # Calculate metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
