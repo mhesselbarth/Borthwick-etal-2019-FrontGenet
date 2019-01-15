@@ -77,7 +77,6 @@ what <- c(class, landscape)
 #                                                      classes_max = 3)
 # 
 # # Calculate metrics locally but overall printing progress
-
 total_clippigings <- length(clippings_pmm)
 
 landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
