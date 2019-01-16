@@ -2,6 +2,8 @@
 library(tidyverse)
 library(lme4)
 
+#### Preprocessing data ####
+
 # import data surface metrics
 surface_metrics <- readr::read_rds("data/Output/surface_metrics.rds")
 
@@ -25,6 +27,8 @@ landscape_metrics_lndscp <- dplyr::filter(landscape_metrics,
 # reshape to wide format
 landscape_metrics_lndscp <- tidyr::spread(landscape_metrics_lndscp, 
                                           metric, value)
+
+#### Surface metrics ####
 
 # model surface metrics
 surface_metrics_model <- lme4::lFormula(RST ~ Sa + S10z + Ssk + Sku + Sdr + Sbi + 
@@ -63,8 +67,6 @@ dplyr::select(surface_metrics,
   as.data.frame() %>%
   usdm::vif()
 
-
-
 # model optimization function
 modular_function <- function(variables, data, REML = TRUE) {
   
@@ -84,8 +86,6 @@ modular_function <- function(variables, data, REML = TRUE) {
                  fr = model_formula$fr)
 }
 
-
-
 # update model
 surface_metrics_model_1 <- modular_function(RST ~ Sa_scaled + S10z_scaled + Ssk + 
                                               Sdr_scaled + Sbi + Std_scaled + 
@@ -103,7 +103,6 @@ ggplot() +
   geom_hline(yintercept = 0) + 
   labs(x = "fitted values", y = "residuals") +
   theme_bw()
-
 
 # Defining variables for different models
 surface_metrics_model_2 <- modular_function(RST ~ Ssk + Sbi + Stdi + Sfd + Srwi + 
@@ -171,4 +170,31 @@ ci_intervals <- purrr::map(models_list_REML, function(x) {
   confint(x, level = 0.95, method = "Wald")
 })
 
+#### Patch metrics ####
+landscapemetrics_model <- lme4::lFormula(RST ~ ai + area_mn + cai_mn + condent + 
+                                          contag + core_mn + division + ed + 
+                                          ent + iji + joinent + lpi + lsi + mesh +
+                                          mutinf + np + pd + pladj + pr + prd +
+                                          rpr + shdi + shei + siei + split + 
+                                          ta + te + (1|site_a), 
+                                        data = landscape_metrics_lndscp, REML = TRUE)
+
+dplyr::select(landscape_metrics_lndscp, 
+              ai, area_mn, cai_mn, condent, contag, core_mn, division, ed, 
+              ent, iji, joinent, lpi, lsi, mesh, mutinf, np, pd, pladj, pr, 
+              prd, rpr, shdi, shei, siei, split, ta, te) %>% 
+  as.data.frame() %>%
+  usdm::vif() %>% 
+  dplyr::arrange(-VIF)
+
+
+dplyr::select(landscape_metrics_lndscp, 
+              cai_mn, core_mn, iji, mesh, pd,  prd, rpr, split) %>% 
+  as.data.frame() %>%
+  usdm::vif() %>% 
+  dplyr::arrange(-VIF)
+
+landscapemetrics_model <- lme4::lFormula(RST ~ cai_mn + core_mn + iji + mesh + 
+                                           pd + prd + rpr + split + (1|site_a), 
+                                         data = landscape_metrics_lndscp, REML = TRUE)
 
