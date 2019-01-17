@@ -2,33 +2,35 @@
 library(tidyverse)
 library(lme4)
 
-#### Preprocessing data ####
+# model optimization function
+modular_function <- function(variables, data, REML = TRUE) {
+  
+  # parse the data and formula
+  model_formula <- lme4::lFormula(variables, data = data, REML = REML)
+  
+  # create the deviance function to be optimized
+  deviance_function <- do.call(lme4::mkLmerDevfun, model_formula)
+  
+  # optimize the deviance function:
+  optimization <- lme4::optimizeLmer(deviance_function)
+  
+  # package up the results
+  lme4::mkMerMod(rho = environment(deviance_function), 
+                 opt = optimization, 
+                 reTrms = model_formula$reTrms,
+                 fr = model_formula$fr)
+}
+
+#### Surface metrics ####
 
 # import data surface metrics
 surface_metrics <- readr::read_rds("data/Output/surface_metrics.rds")
-
-# import data landscape metrics
-landscape_metrics <- readr::read_rds("data/Output/landscape_metrics.rds")
 
 # import RST value
 rst <- readr::read_rds("data/rst.rds")
 
 # add RST to data sets
 surface_metrics <- dplyr::left_join(surface_metrics, rst, by = c("site_1", "site_2"))
-
-landscape_metrics <- dplyr::left_join(landscape_metrics, rst, 
-                                      by = c("site_a" = "site_1", "site_b" = "site_2"))
-
-# only metrics on landscape level and needed cols
-landscape_metrics_lndscp <- dplyr::filter(landscape_metrics, 
-                                          level == "landscape") %>%
-  dplyr::select(site_a, site_b, metric, value, RST, euclidean_distance)
-
-# reshape to wide format
-landscape_metrics_lndscp <- tidyr::spread(landscape_metrics_lndscp, 
-                                          metric, value)
-
-#### Surface metrics ####
 
 # model surface metrics
 surface_metrics_model <- lme4::lFormula(RST ~ Sa + S10z + Ssk + Sku + Sdr + Sbi + 
@@ -50,11 +52,6 @@ surface_metrics_model <- lme4::lFormula(RST ~ Sa_scaled + S10z_scaled + Ssk + Sk
                                           Std_scaled + Stdi + Sfd + Srwi + (1|site_1), 
                                         data = surface_metrics, REML = TRUE)
 
-dplyr::select(surface_metrics, 
-              Sa_scaled,S10z_scaled,Ssk,Sku,Sdr_scaled,Sbi,Std_scaled,Stdi,Sfd,Srwi) %>% 
-  as.data.frame() %>%
-  usdm::vif()
-
 # Checking for variance inflation multicollinearity
 dplyr::select(surface_metrics, 
               Sa_scaled, S10z_scaled, Ssk, Sku, Sdr_scaled, Sbi, Std_scaled, Stdi, Sfd, Srwi) %>% 
@@ -66,25 +63,6 @@ dplyr::select(surface_metrics,
               Sa_scaled, S10z_scaled, Ssk, Sdr_scaled, Sbi, Std_scaled, Stdi, Sfd, Srwi) %>% 
   as.data.frame() %>%
   usdm::vif()
-
-# model optimization function
-modular_function <- function(variables, data, REML = TRUE) {
-  
-  # parse the data and formula
-  model_formula <- lme4::lFormula(variables, data = data, REML = REML)
-  
-  # create the deviance function to be optimized
-  deviance_function <- do.call(lme4::mkLmerDevfun, model_formula)
-  
-  # optimize the deviance function:
-  optimization <- lme4::optimizeLmer(deviance_function)
-  
-  # package up the results
-  lme4::mkMerMod(rho = environment(deviance_function), 
-                 opt = optimization, 
-                 reTrms = model_formula$reTrms,
-                 fr = model_formula$fr)
-}
 
 # update model
 surface_metrics_model_1 <- modular_function(RST ~ Sa_scaled + S10z_scaled + Ssk + 
@@ -171,30 +149,85 @@ ci_intervals <- purrr::map(models_list_REML, function(x) {
 })
 
 #### Patch metrics ####
+
+# import data landscape metrics
+landscape_metrics <- readr::read_rds("data/Output/landscape_metrics.rds")
+
+# import RST value
+rst <- readr::read_rds("data/rst.rds")
+
+# add rst value
+landscape_metrics <- dplyr::left_join(landscape_metrics, rst, 
+                                      by = c("site_a" = "site_1", "site_b" = "site_2"))
+
+# only metrics on landscape level and needed cols
+landscape_metrics_lndscp <- dplyr::filter(landscape_metrics, 
+                                          level == "landscape") %>%
+  dplyr::select(site_a, site_b, metric, value, RST, euclidean_distance)
+
+# reshape to wide format
+landscape_metrics_lndscp <- tidyr::spread(landscape_metrics_lndscp, 
+                                          metric, value)
+
+# remove pr and rpr (pr = 3 and rpr = 100% for all clips)
+landscape_metrics_lndscp <- dplyr::select(landscape_metrics_lndscp, 
+                                          -rpr, -pr)
+
+# fitting model (not sure what the problem is...)
 landscapemetrics_model <- lme4::lFormula(RST ~ ai + area_mn + cai_mn + condent + 
-                                          contag + core_mn + division + ed + 
-                                          ent + iji + joinent + lpi + lsi + mesh +
-                                          mutinf + np + pd + pladj + pr + prd +
-                                          rpr + shdi + shei + siei + split + 
-                                          ta + te + (1|site_a), 
+                                           contag + core_mn + division + ed + 
+                                           ent + iji + joinent + lpi + lsi + mesh +
+                                           mutinf + np + pd + pladj + prd +
+                                           shdi + shei + siei + split + 
+                                           ta + te + (1|site_a), 
                                         data = landscape_metrics_lndscp, REML = TRUE)
 
+# Checking for variance inflation multicollinearity
 dplyr::select(landscape_metrics_lndscp, 
               ai, area_mn, cai_mn, condent, contag, core_mn, division, ed, 
-              ent, iji, joinent, lpi, lsi, mesh, mutinf, np, pd, pladj, pr, 
-              prd, rpr, shdi, shei, siei, split, ta, te) %>% 
+              ent, iji, joinent, lpi, lsi, mesh, mutinf, np, pd, pladj, 
+              prd, shdi, shei, siei, split, ta, te) %>% 
   as.data.frame() %>%
   usdm::vif() %>% 
   dplyr::arrange(-VIF)
 
-
+# removing the metric with the highest value subsequently ending up with ones below 10
 dplyr::select(landscape_metrics_lndscp, 
-              cai_mn, core_mn, iji, mesh, pd,  prd, rpr, split) %>% 
+              cai_mn, core_mn, iji, mesh, pd, prd, split) %>% 
   as.data.frame() %>%
   usdm::vif() %>% 
   dplyr::arrange(-VIF)
 
+# fitting model (different scales)
 landscapemetrics_model <- lme4::lFormula(RST ~ cai_mn + core_mn + iji + mesh + 
-                                           pd + prd + rpr + split + (1|site_a), 
+                                           pd + prd + split + (1|site_a), 
                                          data = landscape_metrics_lndscp, REML = TRUE)
 
+# rescale metrics
+landscape_metrics_lndscp <- dplyr::mutate(landscape_metrics_lndscp, 
+                                          cai_mn_scaled = as.numeric(scale(cai_mn)), 
+                                          core_mn_scaled = as.numeric(scale(core_mn)),
+                                          iji_scaled = as.numeric(scale(iji)),
+                                          mesh_scaled = as.numeric(scale(mesh)),
+                                          pd_scaled = as.numeric(scale(pd)),
+                                          prd_scaled = as.numeric(scale(prd)),
+                                          split_scaled = as.numeric(scale(split)))
+
+
+# update model
+landscapemetrics_model_1 <- modular_function(RST ~ cai_mn_scaled + core_mn_scaled + 
+                                             iji_scaled + mesh_scaled + pd_scaled + 
+                                             prd_scaled +  split_scaled +
+                                             (1|site_a), data = landscape_metrics_lndscp,  REML = TRUE)
+
+# look at model summary
+summary(landscapemetrics_model_1)
+
+# plot model results
+ggplot() + 
+  geom_point(aes(x = fitted(landscapemetrics_model_1), 
+                 y = residuals(landscapemetrics_model_1)), 
+             pch = 1, size = 2.5) + 
+  geom_hline(yintercept = 0) + 
+  labs(x = "fitted values", y = "residuals") +
+  theme_bw()
