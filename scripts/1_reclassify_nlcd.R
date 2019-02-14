@@ -14,7 +14,7 @@ nlcd <- raster::ratify(nlcd)
 # sort(unique(raster::values(nlcd)))
 
 # add classes of NLCD
-levels_nlcd <- levels(nlcd)[[1]]
+levels_nlcd <- raster::levels(nlcd)[[1]]
 levels_nlcd$class <- c("water", "urban", "residential (lo)", "residential (hi)", "commercial", 
                        "rock", "forest (d)", "forest (e)", "forest (m)", "shrub", "grass",
                        "pasture", "crops", "wetlands (w)", "wetlands (h)", "NA")
