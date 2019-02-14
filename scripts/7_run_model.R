@@ -231,3 +231,15 @@ ggplot() +
   geom_hline(yintercept = 0) + 
   labs(x = "fitted values", y = "residuals") +
   theme_bw()
+
+# USE MuMIn::dredge()
+
+model_dredge <- MuMIn::dredge(landscapemetrics_model_1)
+
+lmerTest::step.lmerModLmerTest(landscapemetrics_model_1)
+
+aic_selection <- cAIC4::stepcAIC(landscapemetrics_model_1, 
+                                 data = landscape_metrics_lndscp,
+                                 direction = "forward",
+                                 trace = TRUE,
+                                 numberOfSavedModels = 10)
