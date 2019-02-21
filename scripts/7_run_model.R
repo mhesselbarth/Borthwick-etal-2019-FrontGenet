@@ -1,6 +1,7 @@
 # load libraries
 library(tidyverse)
 library(lme4)
+library(MuMIn)
 
 # model optimization function
 modular_function <- function(variables, data, REML = TRUE) {
@@ -233,13 +234,16 @@ ggplot() +
   theme_bw()
 
 # USE MuMIn::dredge()
-options(na.action = "na.fail") 
-
 full_model <- lme4::lmer(RST ~ cai_mn_scaled + core_mn_scaled + 
   iji_scaled + mesh_scaled + pd_scaled + 
   prd_scaled +  split_scaled +
-  (1|site_a), data = landscape_metrics_lndscp,  REML = FALSE)
+  (1|site_a), 
+  data = landscape_metrics_lndscp,REML = FALSE, na.action = "na.fail")
 
 model_dredge <- MuMIn::dredge(full_model)
 
-options(na.action = "na.omit")
+summary(MuMIn::model.avg(MuMIn::get.models(model_dredge, subset=TRUE)))
+
+### And again we can get the average model only using models with delta AICc < 2.
+
+summary(model.avg(get.models(models, subset=delta<2)))
