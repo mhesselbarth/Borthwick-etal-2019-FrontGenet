@@ -234,16 +234,16 @@ ggplot() +
   theme_bw()
 
 # USE MuMIn::dredge()
+
+# fit full model
 full_model <- lme4::lmer(RST ~ cai_mn_scaled + core_mn_scaled + 
   iji_scaled + mesh_scaled + pd_scaled + 
   prd_scaled +  split_scaled +
   (1|site_a), 
   data = landscape_metrics_lndscp,REML = FALSE, na.action = "na.fail")
 
+# dredge models
 model_dredge <- MuMIn::dredge(full_model)
 
-summary(MuMIn::model.avg(MuMIn::get.models(model_dredge, subset=TRUE)))
-
-### And again we can get the average model only using models with delta AICc < 2.
-
-summary(model.avg(get.models(models, subset=delta<2)))
+# only models with a delta < 2 (rule of thumb)
+subset(model_dredge, delta < 2)
