@@ -233,13 +233,13 @@ ggplot() +
   theme_bw()
 
 # USE MuMIn::dredge()
+options(na.action = "na.fail") 
 
-model_dredge <- MuMIn::dredge(landscapemetrics_model_1)
+full_model <- lme4::lmer(RST ~ cai_mn_scaled + core_mn_scaled + 
+  iji_scaled + mesh_scaled + pd_scaled + 
+  prd_scaled +  split_scaled +
+  (1|site_a), data = landscape_metrics_lndscp,  REML = FALSE)
 
-lmerTest::step.lmerModLmerTest(landscapemetrics_model_1)
+model_dredge <- MuMIn::dredge(full_model)
 
-aic_selection <- cAIC4::stepcAIC(landscapemetrics_model_1, 
-                                 data = landscape_metrics_lndscp,
-                                 direction = "forward",
-                                 trace = TRUE,
-                                 numberOfSavedModels = 10)
+options(na.action = "na.omit")
