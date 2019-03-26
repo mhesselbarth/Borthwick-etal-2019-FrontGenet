@@ -7,13 +7,17 @@ library(tidyverse)
 
 #### General data ####
 
+# read state boundary
 boundary <- sf::read_sf("data/TV_maps_data/IN_poly.shp")
 
+# convert do data frame for easier plotting
 boundary_df <- sf::st_coordinates(boundary) %>%
   tibble::as_tibble()
 
+# read sample sites
 sampling_sites <- sf::read_sf("data/TV_maps_data/TV_sites.shp")
 
+# plot sample sites and state border
 sampling_sites_gg <- ggplot2::ggplot(data = sampling_sites) + 
   ggplot2::geom_point(ggplot2::aes(x = E, y = N, col = Site_name), size = 2, pch = 19) + 
   ggplot2::geom_polygon(data = boundary_df, 
@@ -22,6 +26,7 @@ sampling_sites_gg <- ggplot2::ggplot(data = sampling_sites) +
   ggplot2::coord_equal() + 
   ggplot2::theme_void()
 
+# save plot
 ggplot2::ggsave("plots/sampling_sites_gg.png", plot = sampling_sites_gg)
 
 #### Habitat suitability surface #### 
@@ -34,6 +39,7 @@ habitat_surface_df <- as.data.frame(habitat_surface, xy = TRUE) %>%
   tibble::as_tibble() %>%
   dplyr::filter(!is.na(Habitat_surface))
 
+# plot habitat surface
 habitat_surface_gg <- ggplot2::ggplot(data = habitat_surface_df) + 
   ggplot2::geom_raster(ggplot2::aes(x = x, y = y, fill = Habitat_surface)) + 
   ggplot2::geom_polygon(data = boundary_df, 
@@ -42,9 +48,11 @@ habitat_surface_gg <- ggplot2::ggplot(data = habitat_surface_df) +
   ggplot2::coord_equal() + 
   ggplot2::theme_void()
 
+# make sure RAM gets empty
 rm(list = c("habitat_surface", "habitat_surface_df"))
 gc()
 
+# save plot
 ggplot2::ggsave("plots/habitat_surface_gg.png", plot = habitat_surface_gg)
 
 #### Conductance/Resistance surface #### 
@@ -57,6 +65,7 @@ resistance_surface_df <- as.data.frame(resistance_surface, xy = TRUE) %>%
   tibble::as_tibble() %>%
   dplyr::filter(!is.na(TV_resist))
 
+# plot resistance surface
 resistance_surface_gg <- ggplot2::ggplot(data = resistance_surface_df) + 
   ggplot2::geom_raster(ggplot2::aes(x = x, y = y, fill = TV_resist)) + 
   ggplot2::geom_polygon(data = boundary_df, 
@@ -65,9 +74,11 @@ resistance_surface_gg <- ggplot2::ggplot(data = resistance_surface_df) +
   ggplot2::coord_equal() + 
   ggplot2::theme_void()
 
+# make sure RAM gets empty
 rm(list = c("resistance_surface", "resistance_surface_df"))
 gc()
 
+# save plot
 ggplot2::ggsave("plots/resistance_surface_gg.png", plot = resistance_surface_gg)
 
 #### Current density map #### 
@@ -75,6 +86,7 @@ ggplot2::ggsave("plots/resistance_surface_gg.png", plot = resistance_surface_gg)
 # import data 
 current_density <- raster::raster("data/TV_maps_data/TV_current_dens.tif")
 
+# mask data to Indiana
 current_density <- raster::mask(x = current_density, mask = as(boundary, "Spatial"))
 
 # convert to data frame
@@ -90,9 +102,11 @@ current_density_gg <- ggplot2::ggplot(data = current_density_df) +
   ggplot2::coord_equal() + 
   ggplot2::theme_void()
 
+# make sure RAM gets empty
 rm(list = c("current_density", "current_density_df"))
 gc()
 
+# save plot
 ggplot2::ggsave("plots/current_density_gg.png", plot = current_density_gg)
 
 #### Reclassified habitat patches map ####
@@ -105,6 +119,7 @@ nlcd_df <- as.data.frame(nlcd, xy = TRUE) %>%
   tibble::as_tibble() %>%
   dplyr::filter(!is.na(layer_class))
 
+# plot NLCD
 nlcd_gg <- ggplot2::ggplot(data = nlcd_df) + 
   ggplot2::geom_raster(ggplot2::aes(x = x, y = y, fill = layer_class)) + 
   ggplot2::geom_polygon(data = boundary_df, 
@@ -117,9 +132,11 @@ nlcd_gg <- ggplot2::ggplot(data = nlcd_df) +
   ggplot2::coord_equal() + 
   ggplot2::theme_void()
 
+# make sure RAM gets empty
 rm(list = c("nlcd", "nlcd_df"))
 gc()
 
+# save plots
 ggplot2::ggsave("plots/nlcd_gg.png", plot = nlcd_gg)
 
 #### Combine plots ####
