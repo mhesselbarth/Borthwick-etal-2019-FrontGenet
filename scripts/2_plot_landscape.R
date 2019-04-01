@@ -1,5 +1,5 @@
 library(gridExtra)
-library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions") - only needed to save data
+library(helpeR) # devtools::install_github("mhesselbarth/helpeR") - only needed to save data
 library(raster)
 library(rasterVis)
 library(sp)

@@ -1,7 +1,7 @@
 # Import libraries
 # library(BAMMtools)
 library(patchwork) # devtools::install_github("thomasp85/patchwork")
-library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions")
+library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
 library(raster)
 library(sp)
 library(tidyverse)
@@ -77,17 +77,17 @@ ggplot_surface_vs_pmm <- ggplot_surface + ggplot_pmm
 # Save output
 overwrite <- FALSE
 
-UtilityFunctions::save_rds(object = habitat_surface_pmm, 
-                           filename = "habitat_surface_pmm.rds", 
-                           path = paste0(getwd(), "/data/output"), 
-                           overwrite = overwrite)
+helpeR::save_rds(object = habitat_surface_pmm, 
+                 filename = "habitat_surface_pmm.rds", 
+                 path = paste0(getwd(), "/data/output"), 
+                 overwrite = overwrite)
 
-UtilityFunctions::save_ggplot(plot = ggplot_histogramm, 
-                              filename = "ggplot_histogramm.png", 
-                              path = paste0(getwd(), "/plots"), 
-                              overwrite = overwrite)
+helpeR::save_ggplot(plot = ggplot_histogramm, 
+                    filename = "ggplot_histogramm.png", 
+                    path = paste0(getwd(), "/plots"), 
+                    overwrite = overwrite)
 
-UtilityFunctions::save_ggplot(plot = ggplot_surface_vs_pmm, 
-                              filename = "ggplot_surface_vs_pmm.png", 
-                              path = paste0(getwd(), "/plots"), 
-                              overwrite = overwrite)
+helpeR::save_ggplot(plot = ggplot_surface_vs_pmm, 
+                    filename = "ggplot_surface_vs_pmm.png", 
+                    path = paste0(getwd(), "/plots"), 
+                    overwrite = overwrite)

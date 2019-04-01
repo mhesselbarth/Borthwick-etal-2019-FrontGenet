@@ -1,6 +1,6 @@
 # load packages
 library(ecodist)
-library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions")
+library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
 library(tidyverse)
 
 # import data
@@ -138,25 +138,25 @@ ggplot_correlation_rst_class_forest <- ggplot2::ggplot(class_forest, ggplot2::ae
 # save plots
 overwrite <- TRUE
 
-UtilityFunctions::save_ggplot(plot = ggplot_correlation_rst_surface, 
-                              filename = "ggplot_correlation_rst_surface.png", 
-                              path = paste0(getwd(), "/plots"),
-                              overwrite = overwrite, 
-                              width = 15, height = 7, unit = "in")
+helpeR::save_ggplot(plot = ggplot_correlation_rst_surface, 
+                    filename = "ggplot_correlation_rst_surface.png", 
+                    path = paste0(getwd(), "/plots"),
+                    overwrite = overwrite, 
+                    width = 15, height = 7, unit = "in")
 
-UtilityFunctions::save_ggplot(plot = ggplot_correlation_rst_landscape_level, 
-                              filename = "ggplot_correlation_rst_landscape_level.png", 
-                              path = paste0(getwd(), "/plots"),
-                              overwrite = overwrite,
-                              width = 15, height = 7, unit = "in")
+helpeR::save_ggplot(plot = ggplot_correlation_rst_landscape_level, 
+                    filename = "ggplot_correlation_rst_landscape_level.png", 
+                    path = paste0(getwd(), "/plots"),
+                    overwrite = overwrite,
+                    width = 15, height = 7, unit = "in")
 
-UtilityFunctions::save_ggplot(plot = ggplot_correlation_rst_class_forest, 
-                              filename = "ggplot_correlation_rst_class_forest.png", 
-                              path = paste0(getwd(), "/plots"),
-                              overwrite = overwrite, 
-                              width = 15, height = 7, unit = "in")
+helpeR::save_ggplot(plot = ggplot_correlation_rst_class_forest,
+                    filename = "ggplot_correlation_rst_class_forest.png",
+                    path = paste0(getwd(), "/plots"),
+                    overwrite = overwrite,
+                    width = 15, height = 7, unit = "in")
 
-# UtilityFunctions::save_ggplot(plot = ggplot_correlation_rst_class_complementary, 
+# helpeR::save_ggplot(plot = ggplot_correlation_rst_class_complementary, 
 #                               filename = "ggplot_correlation_rst_class_complementary.png", 
 #                               path = paste0(getwd(), "/plots"),
 #                               overwrite = overwrite)

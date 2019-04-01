@@ -1,6 +1,6 @@
 # load packages
 library(landscapemetrics)
-library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions")
+library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
 library(tidyverse)
 
 # import data
@@ -11,9 +11,16 @@ class_level <- dplyr::filter(landscape_metrics, level == "class")
 landscape_level <- dplyr::filter(landscape_metrics, level == "landscape")
 
 # plot correlations
-ggplot_correlation_class <- landscapemetrics::show_correlation(class_level)
+# ggplot_correlation_class <- landscapemetrics::show_correlation(class_level, 
+#                                                                diag = FALSE)
 
-ggplot_correlation_landscape <- landscapemetrics::show_correlation(landscape_level)
+ggplot_correlation_landscape <- landscapemetrics::show_correlation(landscape_level,
+                                                                   diag = FALSE)
+
+ggplot_correlation_landscape_filtered <- dplyr::filter(landscape_level, 
+                                                       metric %in% c("core_mn", "iji", "mesh", 
+                                                                     "pd", "prd", "split")) %>%
+  landscapemetrics::show_correlation(diag = FALSE)
 
 # convert to wide format
 metrics_landscape_wide <- stats::xtabs(value ~ layer + metric,
@@ -46,14 +53,20 @@ dplyr::filter(correlation_landscape, value < 0.1 & value > -0.1)
 # Save plots
 overwrite <- FALSE
 
-UtilityFunctions::save_ggplot(plot = ggplot_correlation_class, 
-                              filename = "ggplot_correlation_class.png", 
-                              path = paste0(getwd(), "/plots"), 
-                              width = 35, height = 35, units = "cm",
-                              overwrite = overwrite)
+# helpeR::save_ggplot(plot = ggplot_correlation_class, 
+#                               filename = "ggplot_correlation_class.png", 
+#                               path = paste0(getwd(), "/plots"), 
+#                               width = 35, height = 35, units = "cm",
+#                               overwrite = overwrite)
 
-UtilityFunctions::save_ggplot(plot = ggplot_correlation_landscape, 
-                              filename = "ggplot_correlation_landscape.png", 
-                              path = paste0(getwd(), "/plots"), 
-                              width = 35, height = 35, units = "cm",
-                              overwrite = overwrite)
+helpeR::save_ggplot(plot = ggplot_correlation_landscape, 
+                    filename = "ggplot_correlation_landscape.png", 
+                    path = paste0(getwd(), "/plots"), 
+                    width = 35, height = 35, units = "cm",
+                    overwrite = overwrite)
+
+helpeR::save_ggplot(plot = ggplot_correlation_landscape_filtered, 
+                    filename = "ggplot_correlation_landscape_filtered.png", 
+                    path = paste0(getwd(), "/plots"), 
+                    width = 35, height = 35, units = "cm",
+                    overwrite = overwrite)

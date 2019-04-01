@@ -1,5 +1,6 @@
 # load libraries
 library(clustermq)
+library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
 library(landscapemetrics)
 library(raster)
 library(tidyverse)
@@ -104,10 +105,10 @@ landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                                   walltime = "06:00",
                                                   processes = 1))
 
-# UtilityFunctions::save_rds(object = landscape_metrics,
-#                            filename = "landscape_metrics_raw.rds",
-#                            path = paste0(getwd(), "/data/output"),
-#                            overwrite = TRUE)
+# helpeR::save_rds(object = landscape_metrics,
+#                  filename = "landscape_metrics_raw.rds",
+#                  path = paste0(getwd(), "/data/output"),
+#                  overwrite = TRUE)
 
 # Rowbind returning list and add site names
 landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
@@ -134,10 +135,10 @@ landscape_metrics <- dplyr::mutate(landscape_metrics,
   dplyr::arrange(site_a, site_b)
 
 # Order and save results
-UtilityFunctions::save_rds(object = landscape_metrics, 
-                           filename = "landscape_metrics.rds", 
-                           path = paste0(getwd(), "/data/output"), 
-                           overwrite = FALSE)
+helpeR::save_rds(object = landscape_metrics, 
+                 filename = "landscape_metrics.rds", 
+                 path = paste0(getwd(), "/data/output"), 
+                 overwrite = FALSE)
 
 write.table(landscape_metrics,
             file = paste0(getwd(), '/data/output/landscape_metrics.csv'),

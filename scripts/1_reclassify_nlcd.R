@@ -1,5 +1,5 @@
 library(gridExtra)
-library(UtilityFunctions) # devtools::install_github("mhesselbarth/UtilityFunctions") - only needed to save data
+library(helpeR) # devtools::install_github("mhesselbarth/helpeR") - only needed to save data
 library(raster)
 library(rasterVis)
 library(tidyverse)
@@ -41,13 +41,13 @@ levels_nlcd_reclassified$class <- c("forest", "complementary", "non-habitat")
 levels(nlcd_reclassified) <- levels_nlcd_reclassified
 
 # Save results
-UtilityFunctions::save_rds(object = nlcd, 
-                           filename = "nlcd.rds", 
-                           path = paste0(getwd(), "/data/output"), 
-                           overwrite = FALSE)
+helpeR::save_rds(object = nlcd, 
+                 filename = "nlcd.rds", 
+                 path = paste0(getwd(), "/data/output"), 
+                 overwrite = FALSE)
 
 # Save results
-UtilityFunctions::save_rds(object = nlcd_reclassified, 
-                           filename = "nlcd_reclassified.rds", 
-                           path = paste0(getwd(), "/data/output"), 
-                           overwrite = FALSE)
+helpeR::save_rds(object = nlcd_reclassified, 
+                 filename = "nlcd_reclassified.rds", 
+                 path = paste0(getwd(), "/data/output"), 
+                 overwrite = FALSE)
