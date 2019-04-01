@@ -6,7 +6,7 @@ library(tidyverse)
 # import data
 landscape_metrics <- readr::read_rds(paste0(getwd(), "/data/output/landscape_metrics.rds"))
 surface_metrics <- readr::read_rds(paste0(getwd(), "/data/output/surface_metrics.rds"))
-rst <- readr::read_rds(paste0(getwd(), "/data/output/rst.rds"))
+rst <- readr::read_rds(paste0(getwd(), "/data/rst.rds"))
 
 # filter data 
 landscape_level <- dplyr::filter(landscape_metrics,
@@ -136,7 +136,7 @@ ggplot_correlation_rst_class_forest <- ggplot2::ggplot(class_forest, ggplot2::ae
 #   ggplot2::theme_bw()
 
 # save plots
-overwrite <- TRUE
+overwrite <- FALSE
 
 helpeR::save_ggplot(plot = ggplot_correlation_rst_surface, 
                     filename = "ggplot_correlation_rst_surface.png", 

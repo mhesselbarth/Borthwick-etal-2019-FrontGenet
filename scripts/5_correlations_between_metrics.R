@@ -20,7 +20,7 @@ ggplot_correlation_landscape <- landscapemetrics::show_correlation(landscape_lev
 ggplot_correlation_landscape_filtered <- dplyr::filter(landscape_level, 
                                                        metric %in% c("core_mn", "iji", "mesh", 
                                                                      "pd", "prd", "split")) %>%
-  landscapemetrics::show_correlation(diag = FALSE)
+  landscapemetrics::show_correlation(diag = FALSE, text_size = 20)
 
 # convert to wide format
 metrics_landscape_wide <- stats::xtabs(value ~ layer + metric,
@@ -70,3 +70,4 @@ helpeR::save_ggplot(plot = ggplot_correlation_landscape_filtered,
                     path = paste0(getwd(), "/plots"), 
                     width = 35, height = 35, units = "cm",
                     overwrite = overwrite)
+
