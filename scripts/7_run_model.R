@@ -1,27 +1,32 @@
 # load libraries
 library(tidyverse)
 library(lme4)
+library(Matrix)
 library(MuMIn)
 
 # model optimization function
-modular_function <- function(variables, data, REML = TRUE) {
-  
+modular_function <- function(variables, data, REML = TRUE, ZZ) {
+
   # parse the data and formula
-  model_formula <- lme4::lFormula(variables, data = data, REML = REML)
+  model <- lme4::lFormula(variables, data = data, REML = REML)
   
+  # replace ZZ matrix
+  model$reTrms$Zt <- ZZ
+
   # create the deviance function to be optimized
-  deviance_function <- do.call(lme4::mkLmerDevfun, model_formula)
-  
+  deviance_function <- do.call(lme4::mkLmerDevfun, model)
+
   # optimize the deviance function:
   optimization <- lme4::optimizeLmer(deviance_function)
-  
-  # package up the results
-  lme4::mkMerMod(rho = environment(deviance_function), 
-                 opt = optimization, 
-                 reTrms = model_formula$reTrms,
-                 fr = model_formula$fr)
-}
 
+  # package up the results
+  model <- lme4::mkMerMod(rho = environment(deviance_function),
+                          opt = optimization,
+                          reTrms = model$reTrms,
+                          fr = model$fr)
+  
+  return(model)
+}
 #### Surface metrics ####
 
 # import data surface metrics
@@ -32,6 +37,11 @@ rst <- readr::read_rds("data/rst.rds")
 
 # add RST to data sets
 surface_metrics <- dplyr::left_join(surface_metrics, rst, by = c("site_1", "site_2"))
+
+# Create Zl and ZZ matrix
+Zl <- lapply(c("site_1","site_2"), function(x) {Matrix::fac2sparse(surface_metrics[[x]], "d", drop = FALSE)})
+
+ZZ <- Reduce("+", Zl[-1], Zl[[1]])
 
 # model surface metrics
 surface_metrics_model <- lme4::lFormula(RST ~ Sa + S10z + Ssk + Sku + Sdr + Sbi + 
@@ -69,7 +79,8 @@ dplyr::select(surface_metrics,
 surface_metrics_model_1 <- modular_function(RST ~ Sa_scaled + S10z_scaled + Ssk + 
                                               Sdr_scaled + Sbi + Std_scaled + 
                                               Stdi + Sfd + Srwi + (1|site_1), 
-                                            data = surface_metrics)
+                                            data = surface_metrics, 
+                                            ZZ = ZZ)
 
 # look at model summary
 summary(surface_metrics_model_1)
@@ -87,36 +98,43 @@ ggplot() +
 surface_metrics_model_2 <- modular_function(RST ~ Ssk + Sbi + Stdi + Sfd + Srwi + 
                                               S10z_scaled + Sdr_scaled + Std_scaled + 
                                               Sa_scaled + (1|site_1), 
-                                            data = surface_metrics)
+                                            data = surface_metrics,
+                                            ZZ = ZZ)
 
 surface_metrics_model_3 <- modular_function(RST ~ Ssk + Sbi + Sfd + S10z_scaled + 
                                               Sdr_scaled + Std_scaled + 
                                               Sa_scaled + (1|site_1), 
-                                            data = surface_metrics)
+                                            data = surface_metrics,
+                                            ZZ = ZZ)
 
 surface_metrics_model_4 <- modular_function(RST ~ Ssk + Sfd + S10z_scaled + 
                                               Sdr_scaled + Std_scaled + (1|site_1),
-                                            data = surface_metrics)
+                                            data = surface_metrics,
+                                            ZZ = ZZ)
 
 # setting REML to FALSE
 surface_metrics_model_1_nr <- modular_function(RST ~ Sa_scaled + S10z_scaled + Ssk + 
                                                  Sdr_scaled + Sbi + Std_scaled + 
                                                  Stdi + Sfd + Srwi + (1|site_1), 
-                                               data = surface_metrics, REML = FALSE)
+                                               data = surface_metrics, REML = FALSE,
+                                               ZZ = ZZ)
 
 surface_metrics_model_2_nr <- modular_function(RST ~ Ssk + Sbi + Stdi + Sfd + Srwi + 
                                                  S10z_scaled + Sdr_scaled + Std_scaled + 
                                                  Sa_scaled + (1|site_1), 
-                                               data = surface_metrics, REML = FALSE)
+                                               data = surface_metrics, REML = FALSE,
+                                               ZZ = ZZ)
 
 surface_metrics_model_3_nr <- modular_function(RST ~ Ssk + Sbi + Sfd + S10z_scaled + 
                                                  Sdr_scaled + Std_scaled + 
                                                  Sa_scaled + (1|site_1), 
-                                               data = surface_metrics, REML = FALSE)
+                                               data = surface_metrics, REML = FALSE,
+                                               ZZ = ZZ)
 
 surface_metrics_model_4_nr <- modular_function(RST ~ Ssk + Sfd + S10z_scaled + 
                                                  Sdr_scaled + Std_scaled + (1|site_1),
-                                               data = surface_metrics, REML = FALSE)
+                                               data = surface_metrics, REML = FALSE,
+                                               ZZ = ZZ)
 
 # put all models in list
 models_list <- list(model_1 = surface_metrics_model_1_nr, 
@@ -148,6 +166,17 @@ models_list_REML <- list(model_1 = surface_metrics_model_1,
 ci_intervals <- purrr::map(models_list_REML, function(x) {
   confint(x, level = 0.95, method = "Wald")
 })
+
+full_model <- lme4::lmer(RST ~ Sa_scaled + S10z_scaled + Ssk + 
+  Sdr_scaled + Sbi + Std_scaled + 
+  Stdi + Sfd + Srwi + (1|site_1), 
+  data = surface_metrics, 
+  REML = FALSE, na.action = "na.fail")
+
+full_model
+
+model_dredge <- MuMIn::dredge(full_model)
+head(model_dredge)
 
 #### Patch metrics ####
 
@@ -244,6 +273,8 @@ full_model <- lme4::lmer(RST ~ cai_mn_scaled + core_mn_scaled +
 
 # dredge models
 model_dredge <- MuMIn::dredge(full_model)
+
+head(model_dredge)
 
 # only models with a delta < 2 (rule of thumb)
 subset(model_dredge, delta < 2)
