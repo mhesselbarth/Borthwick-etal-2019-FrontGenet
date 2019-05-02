@@ -137,20 +137,20 @@ surface_metrics_model_4_nr <- modular_function(RST ~ Ssk + Sfd + S10z_scaled +
                                                ZZ = ZZ)
 
 # put all models in list
-models_list <- list(model_1 = surface_metrics_model_1_nr, 
-                    model_2 = surface_metrics_model_2_nr, 
-                    model_3 = surface_metrics_model_3_nr, 
-                    model_4 = surface_metrics_model_4_nr)
+models_list_nr <- list(model_1 = surface_metrics_model_1_nr, 
+                       model_2 = surface_metrics_model_2_nr, 
+                       model_3 = surface_metrics_model_3_nr, 
+                       model_4 = surface_metrics_model_4_nr)
 
 # calculating AIC and BIC
-information_criterion <- purrr::map_dfr(models_list, function(x) {
+information_criterion_nr <- purrr::map_dfr(models_list_nr, function(x) {
   data.frame(AIC = AIC(x), 
              BIC = BIC(x),
              log_like = attr(logLik(x), "df"))
   }, .id = "model")
 
 # calculating corrected AICc and BICc
-information_criterion <- dplyr::mutate(information_criterion, 
+information_criterion_nr <- dplyr::mutate(information_criterion_nr, 
                                        AICc = AIC + 2 * log_like * 
                                          (log_like + 1) / (48 - log_like - 1),
                                        AICc_min = exp(-0.5 * (AICc - min(AICc))) / sum(exp(-0.5 * (AICc - min(AICc)))),
@@ -172,8 +172,6 @@ full_model <- lme4::lmer(RST ~ Sa_scaled + S10z_scaled + Ssk +
   Stdi + Sfd + Srwi + (1|site_1), 
   data = surface_metrics, 
   REML = FALSE, na.action = "na.fail")
-
-full_model
 
 model_dredge <- MuMIn::dredge(full_model)
 head(model_dredge)
