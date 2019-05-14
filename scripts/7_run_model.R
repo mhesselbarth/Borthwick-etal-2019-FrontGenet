@@ -3,7 +3,7 @@ library(tidyverse)
 library(lme4)
 library(Matrix)
 library(MuMIn)
-library(usdn)
+library(usdm)
 
 # model optimization function
 modular_function <- function(variables, data, REML = TRUE, ZZ) {
