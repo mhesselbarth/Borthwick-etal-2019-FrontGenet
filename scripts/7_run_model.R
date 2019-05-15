@@ -169,6 +169,9 @@ information_criterion_surface <- dplyr::mutate(information_criterion_surface,
 #   confint(x, level = 0.95, method = "Wald")
 # })
 
+# do model selection automatically
+model_selection_surface <- MuMIn::model.sel(models_list_surface, rank = "AICc")
+
 # confidence intervals of best model
 ci_surface_intervals <- confint(models_list_surface[[1]], level = 0.95, method = "Wald")
 
@@ -317,6 +320,9 @@ information_criterion_landscape <- dplyr::mutate(information_criterion_landscape
 # ci_landscape_intervals <- purrr::map(models_list_landscape, function(x) {
 #   confint(x, level = 0.95, method = "Wald")
 # })
+
+# use automatically model selection
+model_selection_landscape <- MuMIn::model.sel(models_list_landscape, rank = "AICc")
 
 # confidence intervals best model
 ci_landscape_intervals <- confint(models_list_landscape[[3]], level = 0.95, method = "Wald")
