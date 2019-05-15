@@ -46,9 +46,9 @@ Zl_surface <- lapply(c("site_1","site_2"), function(x) {Matrix::fac2sparse(surfa
 ZZ_surface <- Reduce("+", Zl_surface[-1], Zl_surface[[1]])
 
 # model surface metrics
-surface_metrics_model <- lme4::lFormula(RST ~ Sa + S10z + Ssk + Sku + Sdr + Sbi + 
-                                          Std + Stdi + Sfd + Srwi + (1|site_1), 
-                                        data = surface_metrics, REML = TRUE)
+surface_metrics_model_1 <- lme4::lFormula(RST ~ Sa + S10z + Ssk + Sku + Sdr + Sbi + 
+                                          Std + Stdi + Sfd + Srwi + (1|site_1),
+                                          data = surface_metrics, REML = TRUE)
 
 # Warning message: Some predictor variables are on 
 # very different scales: consider rescaling 
