@@ -8,7 +8,7 @@ require(readr)
 library(LandGenCourse)
 library(ggplot2)
 library(MuMIn)
-combined_dataset <- read_csv("combined_datasetV3.csv") 
+combined_dataset <- read_csv("~/ownCloud/07_Publications/tbp_dgs_lg/Old_R_stuff/combined_datasetV3.csv") 
 
 df1<-combined_dataset#I'm lazy...
 View(df1)
@@ -44,7 +44,7 @@ usdm::vif(df1.vars)
 #Much happier, all less than 10. I'm considering that acceptable.
 #let's update the model
 Zl <- lapply(c("site_1","site_2"), function(nm) 
-  Matrix:::fac2sparse(CSFdata[[nm]], "d", drop=FALSE))
+  Matrix:::fac2sparse(df1[[nm]], "d", drop=FALSE))
 ZZ <- Reduce("+", Zl[-1], Zl[[1]])
 mod1 <- lme4::lFormula(RST ~ Sa+S10z+Ssk+Sdr+Sbi+Std+Stdi+Sfd+Srwi+(1|site_1), data = df1z, REML = TRUE)
 
