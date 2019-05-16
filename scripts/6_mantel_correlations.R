@@ -119,14 +119,14 @@ ggplot_correlation_rst_surface <- ggplot2::ggplot(surface_metrics, ggplot2::aes(
   ggplot2::geom_smooth(method = "lm") +
   ggplot2::facet_wrap(~ metric, scales = "free_x", labeller = labeller_surface) + 
   ggplot2::labs(x = "Surface metrics", y = "Rst") + 
-  ggplot2::theme_bw(base_size = 15)
+  ggplot2::theme_bw(base_size = 20)
 
 ggplot_correlation_rst_landscape_level <- ggplot2::ggplot(landscape_level, ggplot2::aes(x = value, y = RST)) + 
   ggplot2::geom_point(pch = 1, na.rm = TRUE) + 
   ggplot2::geom_smooth(method = "lm", na.rm = TRUE) +
   ggplot2::facet_wrap(~ metric, scales = "free_x", labeller = labeller_landscape_level) + 
   ggplot2::labs(x = "Patch metrics", y = "Rst") + 
-  ggplot2::theme_bw(base_size = 15) 
+  ggplot2::theme_bw(base_size = 20) 
 
 # ggplot_correlation_rst_class_forest <- ggplot2::ggplot(class_forest, ggplot2::aes(x = value, y = RST)) + 
 #   ggplot2::geom_point(pch = 1, na.rm = TRUE) + 
