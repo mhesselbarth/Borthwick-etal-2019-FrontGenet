@@ -22,24 +22,24 @@ all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
-class <- c("lsm_c_ai", 
-           "lsm_c_area_mn", 
-           "lsm_c_ca", 
-           "lsm_c_cai_mn", 
-           "lsm_c_clumpy", 
-           "lsm_c_core_mn", 
-           "lsm_c_cpland", 
-           "lsm_c_division", 
-           "lsm_c_iji", 
-           "lsm_c_lpi", 
-           "lsm_c_lsi",
-           "lsm_c_mesh", 
-           "lsm_c_np", 
-           "lsm_c_pd", 
-           "lsm_c_pladj", 
-           "lsm_c_pland", 
-           "lsm_c_split", 
-           "lsm_c_te")
+# class <- c("lsm_c_ai", 
+#            "lsm_c_area_mn", 
+#            "lsm_c_ca", 
+#            "lsm_c_cai_mn", 
+#            "lsm_c_clumpy", 
+#            "lsm_c_core_mn", 
+#            "lsm_c_cpland", 
+#            "lsm_c_division", 
+#            "lsm_c_iji", 
+#            "lsm_c_lpi", 
+#            "lsm_c_lsi",
+#            "lsm_c_mesh", 
+#            "lsm_c_np", 
+#            "lsm_c_pd", 
+#            "lsm_c_pladj", 
+#            "lsm_c_pland", 
+#            "lsm_c_split", 
+#            "lsm_c_te")
 
 landscape <- c("lsm_l_ai", 
                "lsm_l_area_mn", 
@@ -70,11 +70,11 @@ landscape <- c("lsm_l_ai",
                "lsm_l_ta", 
                "lsm_l_te")
 
-what <- c(class, landscape)
+# what <- c(class, landscape)
 
 # # Calculate metrics locally
 # landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
-#                                                      what = what,
+#                                                      what = landscape,
 #                                                      classes_max = 3)
 # 
 # # Calculate metrics locally but overall printing progress
@@ -85,7 +85,7 @@ landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
   print(paste0("Progress: ", x, " from ", total_clippigings))
 
   result <- calculate_lsm(landscape = clippings_pmm[[x]],
-                          what = what,
+                          what = landscape,
                           classes_max = 3,
                           verbose = FALSE,
                           progress = FALSE)
@@ -98,7 +98,7 @@ landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
 # Calculate metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   landscape = clippings_pmm,
-                                  const = list(what = what,
+                                  const = list(what = landscape,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
                                   template = list(queue = "fat",
