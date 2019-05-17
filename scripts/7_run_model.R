@@ -153,7 +153,7 @@ information_criterion_surface <- dplyr::mutate(information_criterion_surface,
 # purrr::map_dfr(model_list_surface, function(x) tibble::tibble(AICc = MuMIn::AICc(x)),
 #                .id = "model")
 
-# dredge model
+# dredge model (in week 12 REML = TRUE but dredge throws warning)
 model_dredge_surface <- MuMIn::dredge(surface_metrics_model_full_no_REML)
 
 # only delta larger two (rule of thumb)
@@ -299,7 +299,7 @@ information_criterion_landscape <- dplyr::mutate(information_criterion_landscape
 # purrr::map_dfr(model_list_landscape, function(x) tibble::tibble(AICc = MuMIn::AICc(x)),
 #                .id = "model")
 
-# dredge model
+# dredge model (in week 12 REML = TRUE but dredge throws warning)
 model_dredge_landscape <- MuMIn::dredge(landscape_metrics_model_full_no_REML)
 
 # only delta larger two (rule of thumb)
@@ -314,3 +314,8 @@ landscape_metrics_model_best <- modular_function(variables = RST ~ mesh_scaled +
 # # confidence intervals
 ci_landscape_intervals <- confint(landscape_metrics_model_best, level = 0.95, method = "Wald")
 
+
+#### Compare Results ####
+
+model_dredge_surface_best
+model_dredge_landscape_best
