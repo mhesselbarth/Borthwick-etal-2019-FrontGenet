@@ -46,12 +46,21 @@ modular_function <- function(variables, data, REML = TRUE, ZZ = NULL, call = NUL
 
 get_model_info <- function(model, n) {
   
-  information_criterion <- tibble::tibble(AIC = AIC(model),
-                                          BIC = BIC(model),
-                                          log_like = attr(logLik(model), "df"))
+  # getting AIC and r2
+  information_criterion <- purrr::map_dfr(model, function(x) {
+    
+    ic <- tibble::tibble(AIC = AIC(x),
+                   BIC = BIC(x),
+                   log_like = attr(logLik(x), "df"))
+    
+    r2 <- MuMIn::r.squaredGLMM(x)
+    
+    ic <- dplyr::mutate(ic, 
+                        r2_marginal = r2[1, 1], 
+                        r2_conditional = r2[1, 2])
+    }, .id = "model")
 
-  # calculating corrected AICc and BICc
-  # not sure if weigths are correct at the moment
+  # calculating corrected AICc and BICc and weights
   information_criterion <- dplyr::mutate(information_criterion,
                                          AICc = AIC + 2 * log_like *
                                            (log_like + 1) / (n - log_like - 1),
@@ -60,12 +69,6 @@ get_model_info <- function(model, n) {
                                          BIC_ew = exp(-0.5 * (BIC - min(BIC))) /
                                            sum(exp(-0.5 * (BIC - min(BIC)))))
   
-  r2 <- MuMIn::r.squaredGLMM(model)
-  
-  information_criterion <- dplyr::mutate(information_criterion, 
-                                         r2_marginal = r2[1, 1], 
-                                         r2_conditional = r2[1, 2])
-
   return(information_criterion)
 }
 
@@ -174,13 +177,27 @@ surface_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled + S1
                                               ZZ = ZZ_surface,
                                               REML = TRUE)
 
-# confidence intervals
-ci_surface_intervals <- confint(surface_metrics_best_REML, level = 0.95, 
-                                method = "Wald")
+surface_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + 
+                                                Ssk_scaled + Stdi_scaled + (1|site_1),
+                                                data = surface_metrics,
+                                                ZZ = ZZ_surface,
+                                                REML = TRUE)
 
-info_surface_metrics_best_REML <- get_model_info(model = surface_metrics_best_REML, 
+surface_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + 
+                                                 Sfd_scaled + Ssk_scaled + Stdi_scaled + 
+                                                 (1|site_1),
+                                               data = surface_metrics,
+                                               ZZ = ZZ_surface,
+                                               REML = TRUE)
+
+# combine to one list
+surface_metrics_models_list <- list(best = surface_metrics_best_REML, 
+                                    second = surface_metrics_second_REML, 
+                                    third = surface_metrics_third_REML)
+
+# get model info
+info_surface_metrics_best_REML <- get_model_info(model = surface_metrics_models_list, 
                                                  n = 136)
-
 #### Patch metrics ####
 
 # import data landscape metrics
@@ -291,11 +308,26 @@ landscape_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled +
                                                 ZZ = ZZ_landscape, 
                                                 REML = TRUE)
 
-# # confidence intervals
-ci_landscape_intervals <- confint(landscape_metrics_best_REML, 
-                                  level = 0.95, method = "Wald")
+landscape_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled +
+                                                    mesh_scaled + split_scaled + 
+                                                    (1|site_a),
+                                                  data = landscape_metrics,
+                                                  ZZ = ZZ_landscape, 
+                                                  REML = TRUE)
 
-info_landscape_metrics_best_REML <- get_model_info(model = landscape_metrics_best_REML, 
+landscape_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled +
+                                                    iji_scaled + mesh_scaled + (1|site_a),
+                                                 data = landscape_metrics,
+                                                 ZZ = ZZ_landscape, 
+                                                 REML = TRUE)
+
+# combine models to list
+landscape_metrics_models_list <- list(best = landscape_metrics_model_best_REML,
+                                      second = landscape_metrics_second_REML,
+                                      third = landscape_metrics_third_REML)
+
+# get model info
+info_landscape_metrics_best_REML <- get_model_info(model = landscape_metrics_models_list, 
                                                    n = 136)
 
 #### Isolation by distance
@@ -322,4 +354,4 @@ ibd_model_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1),
                                    REML = TRUE)
 
 # get model information 
-get_model_info(ibd_model_REML, n = 136)
+get_model_info(list(ibd = ibd_model_REML), n = 136)
