@@ -196,8 +196,8 @@ surface_metrics_models_list <- list(best = surface_metrics_best_REML,
                                     third = surface_metrics_third_REML)
 
 # get model info
-info_surface_metrics_best_REML <- get_model_info(model = surface_metrics_models_list, 
-                                                 n = 136)
+info_surface_metrics__REML <- get_model_info(model = surface_metrics_models_list, 
+                                             n = 136)
 #### Patch metrics ####
 
 # import data landscape metrics
@@ -322,13 +322,13 @@ landscape_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled +
                                                  REML = TRUE)
 
 # combine models to list
-landscape_metrics_models_list <- list(best = landscape_metrics_model_best_REML,
+landscape_metrics_models_list <- list(best = landscape_metrics_best_REML,
                                       second = landscape_metrics_second_REML,
                                       third = landscape_metrics_third_REML)
 
 # get model info
-info_landscape_metrics_best_REML <- get_model_info(model = landscape_metrics_models_list, 
-                                                   n = 136)
+info_landscape_metrics_REML <- get_model_info(model = landscape_metrics_models_list,
+                                              n = 136)
 
 #### Isolation by distance
 
@@ -354,4 +354,9 @@ ibd_model_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1),
                                    REML = TRUE)
 
 # get model information 
-get_model_info(list(ibd = ibd_model_REML), n = 136)
+info_ibd_REML <- get_model_info(list(ibd = ibd_model_REML), n = 136)
+
+#### Compare all three models ####
+info_surface_metrics__REML
+info_landscape_metrics_REML
+info_ibd_REML
