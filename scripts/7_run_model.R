@@ -7,7 +7,8 @@ library(MuMIn)
 library(usdm)
 
 # model optimization function
-modular_function <- function(variables, data, REML = TRUE, ZZ = NULL, call = NULL) {
+modular_function <- function(variables, data, REML = TRUE,
+                             ZZ = NULL, call = NULL) {
 
   # parse the data and formula
   model <- lme4::lFormula(variables, data = data, REML = REML)
@@ -47,6 +48,7 @@ modular_function <- function(variables, data, REML = TRUE, ZZ = NULL, call = NUL
 get_model_info <- function(model, n) {
   
   # getting AIC and r2
+  # should we use extractAIC here ?
   information_criterion <- purrr::map_dfr(model, function(x) {
     
     ic <- tibble::tibble(AIC = AIC(x),
@@ -117,27 +119,51 @@ dplyr::select(surface_metrics,
   usdm::vif()
 
 # Create Zl and ZZ matrix
-Zl_surface <- lapply(c("site_1","site_2"), function(x) {Matrix::fac2sparse(surface_metrics[[x]], "d", drop = FALSE)})
+Zl_surface <- lapply(c("site_1","site_2"), function(x) {
+  Matrix::fac2sparse(surface_metrics[[x]], "d", drop = FALSE)})
 
 ZZ_surface <- Reduce("+", Zl_surface[-1], Zl_surface[[1]])
 
 # rescale metrics
 surface_metrics <- dplyr::mutate(surface_metrics, 
-                                 Sa_scaled = as.numeric(scale(Sa, center = TRUE, scale = TRUE)),
-                                 S10z_scaled = as.numeric(scale(S10z, center = TRUE, scale = TRUE)),
-                                 Ssk_scaled = as.numeric(scale(Ssk, center = TRUE, scale = TRUE)),
-                                 Sdr_scaled = as.numeric(scale(Sdr, center = TRUE, scale = TRUE)), 
-                                 Sbi_scaled = as.numeric(scale(Sbi, center = TRUE, scale = TRUE)), 
-                                 Std_scaled = as.numeric(scale(Std, center = TRUE, scale = TRUE)),
-                                 Stdi_scaled = as.numeric(scale(Stdi, center = TRUE, scale = TRUE)),
-                                 Sfd_scaled = as.numeric(scale(Sfd, center = TRUE, scale = TRUE)), 
-                                 Srwi_scaled = as.numeric(scale(Srwi, center = TRUE, scale = TRUE)),
-                                 dist_scaled = as.numeric(scale(euclidean_distance, center = TRUE, scale = TRUE)))
+                                 Sa_scaled = as.numeric(scale(Sa, 
+                                                              center = TRUE, 
+                                                              scale = TRUE)),
+                                 S10z_scaled = as.numeric(scale(S10z, 
+                                                                center = TRUE, 
+                                                                scale = TRUE)),
+                                 Ssk_scaled = as.numeric(scale(Ssk, 
+                                                               center = TRUE, 
+                                                               scale = TRUE)),
+                                 Sdr_scaled = as.numeric(scale(Sdr, 
+                                                               center = TRUE,
+                                                               scale = TRUE)), 
+                                 Sbi_scaled = as.numeric(scale(Sbi, 
+                                                               center = TRUE, 
+                                                               scale = TRUE)), 
+                                 Std_scaled = as.numeric(scale(Std, 
+                                                               center = TRUE,
+                                                               scale = TRUE)),
+                                 Stdi_scaled = as.numeric(scale(Stdi, 
+                                                                center = TRUE, 
+                                                                scale = TRUE)),
+                                 Sfd_scaled = as.numeric(scale(Sfd, 
+                                                               center = TRUE, 
+                                                               scale = TRUE)), 
+                                 Srwi_scaled = as.numeric(scale(Srwi, 
+                                                                center = TRUE, 
+                                                                scale = TRUE)),
+                                 dist_scaled = as.numeric(scale(euclidean_distance, 
+                                                                center = TRUE, 
+                                                                scale = TRUE)))
 
 # specify full models 
-surface_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ Sa_scaled + S10z_scaled + Ssk_scaled + 
-                                                   Sdr_scaled + Sbi_scaled + Std_scaled + Stdi_scaled + 
-                                                   Sfd_scaled + Srwi_scaled + dist_scaled + (1|site_1), 
+surface_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ Sa_scaled + 
+                                                   S10z_scaled + Ssk_scaled + 
+                                                   Sdr_scaled + Sbi_scaled + 
+                                                   Std_scaled + Stdi_scaled + 
+                                                   Sfd_scaled + Srwi_scaled + 
+                                                   dist_scaled + (1|site_1), 
                                                  data = surface_metrics, 
                                                  REML = FALSE, na.action = "na.fail")
 
@@ -145,10 +171,14 @@ surface_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ Sa_scaled + S10
 fun_call_no_REML <- surface_metrics_model_full_no_REML@call
 
 # run model
-surface_metrics_model_full_no_REML <- modular_function(variables = RST ~ Sa_scaled + S10z_scaled + 
-                                                         Ssk_scaled + Sdr_scaled + Sbi_scaled + 
-                                                         Std_scaled + Stdi_scaled + Sfd_scaled + 
-                                                         Srwi_scaled + dist_scaled + (1|site_1), 
+surface_metrics_model_full_no_REML <- modular_function(variables = RST ~ Sa_scaled + 
+                                                         S10z_scaled + 
+                                                         Ssk_scaled + Sdr_scaled + 
+                                                         Sbi_scaled + 
+                                                         Std_scaled + Stdi_scaled +
+                                                         Sfd_scaled + 
+                                                         Srwi_scaled + dist_scaled + 
+                                                         (1|site_1), 
                                                        data = surface_metrics, 
                                                        REML = FALSE, 
                                                        ZZ = ZZ_surface,
@@ -171,20 +201,23 @@ model_dredge_surface_no_REML <- MuMIn::dredge(surface_metrics_model_full_no_REML
   head(n = 5)
 
 # fit best model
-surface_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + 
-                                                Sfd_scaled + Stdi_scaled + (1|site_1),
+surface_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled + 
+                                                S10z_scaled + Sfd_scaled + 
+                                                Stdi_scaled + (1|site_1),
                                               data = surface_metrics,
                                               ZZ = ZZ_surface,
                                               REML = TRUE)
 
-surface_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + 
-                                                Ssk_scaled + Stdi_scaled + (1|site_1),
+surface_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled + 
+                                                  S10z_scaled +  Ssk_scaled + 
+                                                  Stdi_scaled + (1|site_1),
                                                 data = surface_metrics,
                                                 ZZ = ZZ_surface,
                                                 REML = TRUE)
 
-surface_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + 
-                                                 Sfd_scaled + Ssk_scaled + Stdi_scaled + 
+surface_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled + 
+                                                 S10z_scaled + Sfd_scaled + 
+                                                 Ssk_scaled + Stdi_scaled + 
                                                  (1|site_1),
                                                data = surface_metrics,
                                                ZZ = ZZ_surface,
@@ -212,7 +245,8 @@ landscape_metrics <- dplyr::left_join(landscape_metrics, rst,
 
 # add distance
 landscape_metrics <- dplyr::mutate(landscape_metrics,
-                                   euclidean_distance = distance_matrix[cbind(site_a, site_b)]) %>% 
+                                   euclidean_distance = distance_matrix[cbind(site_a, 
+                                                                              site_b)]) %>% 
   dplyr::arrange(site_a, site_b)
 
 # only metrics on landscape level and needed cols
@@ -245,7 +279,8 @@ dplyr::select(landscape_metrics,
   dplyr::arrange(-VIF)
 
 # Create Zl and ZZ matrix
-Zl_landscape <- lapply(c("site_a","site_b"), function(x) {Matrix::fac2sparse(landscape_metrics[[x]], "d", drop = FALSE)})
+Zl_landscape <- lapply(c("site_a","site_b"), function(x) {
+  Matrix::fac2sparse(landscape_metrics[[x]], "d", drop = FALSE)})
 
 ZZ_landscape <- Reduce("+", Zl_landscape[-1], Zl_landscape[[1]])
 
@@ -262,11 +297,11 @@ landscape_metrics <- dplyr::mutate(landscape_metrics,
 
 
 # specify full models 
-landscape_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ pd_scaled + iji_scaled +
-                                                     prd_scaled + core_mn_scaled + 
-                                                     cai_mn_scaled + split_scaled +
-                                                     mesh_scaled + dist_scaled + 
-                                                     (1|site_a), 
+landscape_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ pd_scaled + 
+                                                     iji_scaled + prd_scaled + 
+                                                     core_mn_scaled + cai_mn_scaled + 
+                                                     split_scaled + mesh_scaled +
+                                                     dist_scaled + (1|site_a), 
                                                    data = landscape_metrics, 
                                                    REML = FALSE, 
                                                    na.action = "na.fail")
@@ -275,11 +310,11 @@ landscape_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ pd_scaled + i
 fun_call_no_REML <- landscape_metrics_model_full_no_REML@call
 
 # run model
-landscape_metrics_model_full_no_REML <- modular_function(variables = RST ~ pd_scaled + iji_scaled + 
-                                                           prd_scaled + core_mn_scaled + 
-                                                           cai_mn_scaled + split_scaled +
-                                                           mesh_scaled + dist_scaled + 
-                                                           (1|site_a), 
+landscape_metrics_model_full_no_REML <- modular_function(variables = RST ~ pd_scaled + 
+                                                           iji_scaled + prd_scaled + 
+                                                           core_mn_scaled + cai_mn_scaled + 
+                                                           split_scaled + mesh_scaled + 
+                                                           dist_scaled + (1|site_a), 
                                                          data = landscape_metrics,
                                                          REML = FALSE,
                                                          ZZ = ZZ_landscape, 
@@ -316,7 +351,8 @@ landscape_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled 
                                                   REML = TRUE)
 
 landscape_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled +
-                                                    iji_scaled + mesh_scaled + (1|site_a),
+                                                    iji_scaled + mesh_scaled + 
+                                                   (1|site_a),
                                                  data = landscape_metrics,
                                                  ZZ = ZZ_landscape, 
                                                  REML = TRUE)
@@ -343,7 +379,8 @@ rst <- dplyr::mutate(rst,
   dplyr::arrange(site_1, site_2) 
 
 # create ZZ matrix
-Zl_dist <- lapply(c("site_1","site_2"), function(x) {Matrix::fac2sparse(rst[[x]], "d", drop = FALSE)})
+Zl_dist <- lapply(c("site_1","site_2"), function(x) {
+  Matrix::fac2sparse(rst[[x]], "d", drop = FALSE)})
 
 ZZ_dist <- Reduce("+", Zl_dist[-1], Zl_dist[[1]])
 
