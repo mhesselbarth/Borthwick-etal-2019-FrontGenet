@@ -44,22 +44,30 @@ modular_function <- function(variables, data, REML = TRUE, ZZ = NULL, call = NUL
   return(model)
 }
 
-# get_aic <- function(model, n) {
-#   information_criterion <- tibble::tibble(AIC = AIC(model), 
-#                                           BIC = BIC(model),
-#                                           log_like = attr(logLik(model), "df"))
-#   
-#   # calculating corrected AICc and BICc
-#   information_criterion <- dplyr::mutate(information_criterion, 
-#                                          AICc = AIC + 2 * log_like *
-#                                            (log_like + 1) / (n - log_like - 1),
-#                                          AICc_ew = exp(-0.5 * (AICc - min(AICc))) / 
-#                                            sum(exp(-0.5 * (AICc - min(AICc)))),
-#                                          BIC_ew = exp(-0.5 * (BIC - min(BIC))) / 
-#                                            sum(exp(-0.5 * (BIC - min(BIC))))) 
-#   
-#   return(information_criterion)
-# }
+get_model_info <- function(model, n) {
+  
+  information_criterion <- tibble::tibble(AIC = AIC(model),
+                                          BIC = BIC(model),
+                                          log_like = attr(logLik(model), "df"))
+
+  # calculating corrected AICc and BICc
+  # not sure if weigths are correct at the moment
+  information_criterion <- dplyr::mutate(information_criterion,
+                                         AICc = AIC + 2 * log_like *
+                                           (log_like + 1) / (n - log_like - 1),
+                                         AICc_ew = exp(-0.5 * (AICc - min(AICc))) /
+                                           sum(exp(-0.5 * (AICc - min(AICc)))),
+                                         BIC_ew = exp(-0.5 * (BIC - min(BIC))) /
+                                           sum(exp(-0.5 * (BIC - min(BIC)))))
+  
+  r2 <- MuMIn::r.squaredGLMM(model)
+  
+  information_criterion <- dplyr::mutate(information_criterion, 
+                                         r2_marginal = r2[1, 1], 
+                                         r2_conditional = r2[1, 2])
+
+  return(information_criterion)
+}
 
 #### Import distance
 
@@ -124,38 +132,20 @@ surface_metrics <- dplyr::mutate(surface_metrics,
                                  dist_scaled = as.numeric(scale(euclidean_distance, center = TRUE, scale = TRUE)))
 
 # specify full models 
-surface_metrics_model_full <- lme4::lmer(formula = RST ~ Sa_scaled + S10z_scaled + Ssk_scaled + 
-                                           Sdr_scaled + Sbi_scaled + Std_scaled + Stdi_scaled + 
-                                           Sfd_scaled + Srwi_scaled + dist_scaled + 
-                                           (1|site_1),
-                                         data = surface_metrics, 
-                                         REML = TRUE, na.action = "na.fail")
-
 surface_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ Sa_scaled + S10z_scaled + Ssk_scaled + 
-                                                   Sdr_scaled + Sbi_scaled + Std_scaled + Stdi_scaled + Sfd_scaled + 
-                                                   Srwi_scaled + dist_scaled +
-                                                   (1|site_1), 
+                                                   Sdr_scaled + Sbi_scaled + Std_scaled + Stdi_scaled + 
+                                                   Sfd_scaled + Srwi_scaled + dist_scaled + (1|site_1), 
                                                  data = surface_metrics, 
                                                  REML = FALSE, na.action = "na.fail")
 
 # create call object (needed for model dredging)
-fun_call <- surface_metrics_model_full@call
-
 fun_call_no_REML <- surface_metrics_model_full_no_REML@call
 
 # run model
-surface_metrics_model_full <- modular_function(variables = RST ~ Sa_scaled + S10z_scaled + Ssk_scaled + 
-                                                 Sdr_scaled + Sbi_scaled + Std_scaled + Stdi_scaled + Sfd_scaled + 
-                                                 Srwi_scaled + dist_scaled +
-                                                 (1|site_1), 
-                                               data = surface_metrics,
-                                               ZZ = ZZ_surface, 
-                                               call = fun_call)
-
-surface_metrics_model_full_no_REML <- modular_function(variables = RST ~ Sa_scaled + S10z_scaled + Ssk_scaled + 
-                                                         Sdr_scaled + Sbi_scaled + Std_scaled + Stdi_scaled + Sfd_scaled + 
-                                                         Srwi_scaled + dist_scaled +
-                                                         (1|site_1), 
+surface_metrics_model_full_no_REML <- modular_function(variables = RST ~ Sa_scaled + S10z_scaled + 
+                                                         Ssk_scaled + Sdr_scaled + Sbi_scaled + 
+                                                         Std_scaled + Stdi_scaled + Sfd_scaled + 
+                                                         Srwi_scaled + dist_scaled + (1|site_1), 
                                                        data = surface_metrics, 
                                                        REML = FALSE, 
                                                        ZZ = ZZ_surface,
@@ -173,25 +163,23 @@ surface_metrics_model_full_no_REML <- modular_function(variables = RST ~ Sa_scal
 #   labs(x = "fitted values", y = "residuals") +
 #   theme_bw()
 
-# dredge model (in week 12 REML = TRUE but dredge throws warning)
-model_dredge_surface <- MuMIn::dredge(surface_metrics_model_full_no_REML)
-
-# only delta larger two (rule of thumb)
-model_dredge_surface_best <- head(model_dredge_surface, n = 5)
+# dredge model - don't use REML here: https://tinyurl.com/yagpx4bv
+model_dredge_surface_no_REML <- MuMIn::dredge(surface_metrics_model_full_no_REML) %>% 
+  head(n = 5)
 
 # fit best model
-surface_metrics_model_best <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + Sfd_scaled +
-                                                 Stdi_scaled + (1|site_1),
-                                               data = surface_metrics,
-                                               ZZ = ZZ_surface,
-                                               REML = FALSE)
+surface_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled + S10z_scaled + 
+                                                Sfd_scaled + Stdi_scaled + (1|site_1),
+                                              data = surface_metrics,
+                                              ZZ = ZZ_surface,
+                                              REML = TRUE)
 
 # confidence intervals
-ci_surface_intervals <- confint(surface_metrics_model_best, level = 0.95, 
+ci_surface_intervals <- confint(surface_metrics_best_REML, level = 0.95, 
                                 method = "Wald")
 
-# get R2
-MuMIn::r.squaredGLMM(surface_metrics_model_best)
+info_surface_metrics_best_REML <- get_model_info(model = surface_metrics_best_REML, 
+                                                 n = 136)
 
 #### Patch metrics ####
 
@@ -257,37 +245,19 @@ landscape_metrics <- dplyr::mutate(landscape_metrics,
 
 
 # specify full models 
-landscape_metrics_model_full <- lme4::lmer(formula = RST ~ pd_scaled + iji_scaled + 
-                                             prd_scaled + core_mn_scaled + 
-                                             cai_mn_scaled + split_scaled +
-                                             mesh_scaled + dist_scaled + 
-                                             (1|site_a), 
-                                           data = landscape_metrics, 
-                                           na.action = "na.fail")
-
 landscape_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ pd_scaled + iji_scaled +
                                                      prd_scaled + core_mn_scaled + 
                                                      cai_mn_scaled + split_scaled +
                                                      mesh_scaled + dist_scaled + 
                                                      (1|site_a), 
                                                    data = landscape_metrics, 
-                                                   REML = FALSE, na.action = "na.fail")
+                                                   REML = FALSE, 
+                                                   na.action = "na.fail")
 
 # create call object (needed for model dredging)
-fun_call <- landscape_metrics_model_full@call
-
 fun_call_no_REML <- landscape_metrics_model_full_no_REML@call
 
 # run model
-landscape_metrics_model_full <- modular_function(variables = RST ~ pd_scaled + iji_scaled + 
-                                                   prd_scaled + core_mn_scaled + 
-                                                   cai_mn_scaled + split_scaled +
-                                                   mesh_scaled + dist_scaled + 
-                                                   (1|site_a), 
-                                                 data = landscape_metrics,
-                                                 ZZ = ZZ_landscape, 
-                                                 call = fun_call)
-
 landscape_metrics_model_full_no_REML <- modular_function(variables = RST ~ pd_scaled + iji_scaled + 
                                                            prd_scaled + core_mn_scaled + 
                                                            cai_mn_scaled + split_scaled +
@@ -310,24 +280,23 @@ landscape_metrics_model_full_no_REML <- modular_function(variables = RST ~ pd_sc
 #   labs(x = "fitted values", y = "residuals") +
 #   theme_bw()
 
-# dredge model (in week 12 REML = TRUE but dredge throws warning)
-model_dredge_landscape <- MuMIn::dredge(landscape_metrics_model_full_no_REML)
+# dredge model - don't use REML here: https://tinyurl.com/yagpx4bv
+model_dredge_landscape_no_REML <- MuMIn::dredge(landscape_metrics_model_full_no_REML) %>%
+  head(n = 5)
 
-# only delta larger two (rule of thumb)
-model_dredge_landscape_best <- head(model_dredge_landscape, n = 5)
-
-landscape_metrics_model_best <- modular_function(variables = RST ~ dist_scaled + mesh_scaled +
-                                                   (1|site_a),
-                                                 data = landscape_metrics,
-                                                 ZZ = ZZ_landscape, 
-                                                 REML = FALSE)
+# fit best model
+landscape_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled +
+                                                  mesh_scaled + (1|site_a),
+                                                data = landscape_metrics,
+                                                ZZ = ZZ_landscape, 
+                                                REML = TRUE)
 
 # # confidence intervals
-ci_landscape_intervals <- confint(landscape_metrics_model_best, 
+ci_landscape_intervals <- confint(landscape_metrics_best_REML, 
                                   level = 0.95, method = "Wald")
 
-# get R2 
-MuMIn::r.squaredGLMM(landscape_metrics_model_best)
+info_landscape_metrics_best_REML <- get_model_info(model = landscape_metrics_best_REML, 
+                                                   n = 136)
 
 #### Isolation by distance
 
@@ -346,19 +315,11 @@ Zl_dist <- lapply(c("site_1","site_2"), function(x) {Matrix::fac2sparse(rst[[x]]
 
 ZZ_dist <- Reduce("+", Zl_dist[-1], Zl_dist[[1]])
 
-# fit full model
-ibd_model_no_REML <- lme4::lmer(formula = RST ~ dist_scaled + (1|site_1), 
-                                data = rst, na.action = "na.fail", 
-                                REML = FALSE)
-
 # fit model using ZZ matrix
-ibd_model_no_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1), 
-                              data = rst,
-                              ZZ = ZZ_dist, 
-                              call = ibd_model@call, 
-                              REML = FALSE)
+ibd_model_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1), 
+                                   data = rst,
+                                   ZZ = ZZ_dist,
+                                   REML = TRUE)
 
-model_dredge_ibd <- MuMIn::dredge(ibd_model_no_REML)
-
-# get R2
-MuMIn::r.squaredGLMM(ibd_model_no_REML)
+# get model information 
+get_model_info(ibd_model_REML, n = 136)
