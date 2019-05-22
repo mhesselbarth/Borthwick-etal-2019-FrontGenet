@@ -107,16 +107,11 @@ surface_metrics <- dplyr::mutate(surface_metrics,
   dplyr::arrange(site_1, site_2)
 
 # Checking for variance inflation multicollinearity (VIF)
+# removing metrics with a VIF > 10
 dplyr::select(surface_metrics, 
               Sa, S10z, Ssk, Sku, Sdr, Sbi, Std, Stdi, Sfd, Srwi) %>% 
   as.data.frame() %>%
-  usdm::vif()
-
-# look at VIF, removed Sku
-dplyr::select(surface_metrics, 
-              Sa, S10z, Ssk, Sdr, Sbi, Std, Stdi, Sfd, Srwi) %>% 
-  as.data.frame() %>%
-  usdm::vif()
+  usdm::vifstep(th = 10)
 
 # Create Zl and ZZ matrix
 Zl_surface <- lapply(c("site_1","site_2"), function(x) {
@@ -229,8 +224,8 @@ surface_metrics_models_list <- list(best = surface_metrics_best_REML,
                                     third = surface_metrics_third_REML)
 
 # get model info
-info_surface_metrics__REML <- get_model_info(model = surface_metrics_models_list, 
-                                             n = 136)
+info_surface_metrics_REML <- get_model_info(model = surface_metrics_models_list,
+                                            n = 136)
 #### Patch metrics ####
 
 # import data landscape metrics
@@ -263,19 +258,13 @@ landscape_metrics <- dplyr::select(landscape_metrics,
                                    -rpr, -pr)
 
 # Checking for variance inflation multicollinearity
+# Removing the metric with the highest value subsequently ending up with ones below 10
 dplyr::select(landscape_metrics, 
               ai, area_mn, cai_mn, condent, contag, core_mn, division, ed, 
               ent, iji, joinent, lpi, lsi, mesh, mutinf, np, pd, pladj, 
               prd, shdi, shei, siei, split, ta, te) %>% 
   as.data.frame() %>%
-  usdm::vif() %>% 
-  dplyr::arrange(-VIF)
-
-# removing the metric with the highest value subsequently ending up with ones below 10
-dplyr::select(landscape_metrics, 
-              cai_mn, core_mn, iji, mesh, pd, prd, split) %>% 
-  as.data.frame() %>%
-  usdm::vif() %>% 
+  usdm::vifstep(th = 10) %>% 
   dplyr::arrange(-VIF)
 
 # Create Zl and ZZ matrix
@@ -394,6 +383,6 @@ ibd_model_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1),
 info_ibd_REML <- get_model_info(list(ibd = ibd_model_REML), n = 136)
 
 #### Compare all three models ####
-info_surface_metrics__REML
+info_surface_metrics_REML
 info_landscape_metrics_REML
 info_ibd_REML
