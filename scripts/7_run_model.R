@@ -264,8 +264,7 @@ dplyr::select(landscape_metrics,
               ent, iji, joinent, lpi, lsi, mesh, mutinf, np, pd, pladj, 
               prd, shdi, shei, siei, split, ta, te) %>% 
   as.data.frame() %>%
-  usdm::vifstep(th = 10) %>% 
-  dplyr::arrange(-VIF)
+  usdm::vifstep(th = 10)
 
 # Create Zl and ZZ matrix
 Zl_landscape <- lapply(c("site_a","site_b"), function(x) {
