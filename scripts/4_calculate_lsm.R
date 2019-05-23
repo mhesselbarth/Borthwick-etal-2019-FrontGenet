@@ -10,8 +10,7 @@ source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
 # load the clippings
 clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
 
-clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd_disk.rds"))
-
+# clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd_disk.rds"))
 
 # check if all rasters all loaded in memory
 all(purrr::map_lgl(clippings_pmm, raster::inMemory))
@@ -20,6 +19,7 @@ all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 
 # extract names
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
+
 names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
 # class <- c("lsm_c_ai", 
@@ -78,22 +78,22 @@ landscape <- c("lsm_l_ai",
 #                                                      classes_max = 3)
 # 
 # # Calculate metrics locally but overall printing progress
-total_clippigings <- length(clippings_pmm)
-
-landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
-
-  print(paste0("Progress: ", x, " from ", total_clippigings))
-
-  result <- calculate_lsm(landscape = clippings_pmm[[x]],
-                          what = landscape,
-                          classes_max = 3,
-                          verbose = FALSE,
-                          progress = FALSE)
-  
-  gc(verbose = FALSE, reset = TRUE, full = TRUE)
-  
-  return(result)
-})
+# total_clippigings <- length(clippings_pmm)
+# 
+# landscape_metrics <- purrr::map(seq_along(clippings_pmm), function(x) {
+# 
+#   print(paste0("Progress: ", x, " from ", total_clippigings))
+# 
+#   result <- calculate_lsm(landscape = clippings_pmm[[x]],
+#                           what = landscape,
+#                           classes_max = 3,
+#                           verbose = FALSE,
+#                           progress = FALSE)
+#   
+#   gc(verbose = FALSE, reset = TRUE, full = TRUE)
+#   
+#   return(result)
+# })
 
 # Calculate metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
@@ -101,8 +101,8 @@ landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   const = list(what = landscape,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
-                                  template = list(queue = "fat",
-                                                  walltime = "06:00",
+                                  template = list(queue = "medium",
+                                                  walltime = "48:00:00",
                                                   processes = 1))
 
 # helpeR::save_rds(object = landscape_metrics,
