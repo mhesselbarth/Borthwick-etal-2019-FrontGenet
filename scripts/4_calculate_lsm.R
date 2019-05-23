@@ -153,20 +153,23 @@ write.table(landscape_metrics,
 # 
 # # now we specify a future topology that fits our HPC
 # # login node -> cluster nodes -> core/ multiple cores
-# login <- future::tweak(remote, workers = "gwdu103.gwdg.de",
-#                        user = "hesselbarth3")
+# login <- tweak(future::remote, 
+#                workers = "gwdu103.gwdg.de", 
+#                user = 'hesselbarth3') # user = login credential
 # 
-# bsub <- future::tweak(batchtools_lsf, template = "lsf.tmpl",
-#                       resources = list(job.name = "lsm_clippings",
-#                                        log.file = "lsm_clippings.log",
-#                                        queue = "mpi",
-#                                        walltime = "48:00",
-#                                        processes = 1)) # hpc -> nodes
-# 
-# future::plan(list(login, bsub, future::sequential)) # how to run on nodes, could also be sequential
+# sbatch <- tweak(future.batchtools::batchtools_slurm, 
+#                 template = 'future_slurm.tmpl',
+#                 resources = list(job.name = 'calculate_lsm', # name of the job
+#                                  log.file = 'calculate_lsm.log', # name of log file
+#                                  queue = 'fat', # which partition
+#                                  service = "medium", # which QOS
+#                                  walltime = '06:00:00', # walltime <hh:mm:ss>
+#                                  processes = 1)) # number of cores
+#  
+# future::plan(list(login, sbatch, future::sequential)) # how to run on nodes, could also be sequential
 # 
 # landscape_metrics %<-% furrr::future_map(clippings_pmm, function(x) {
-#   
+# 
 #   calculate_lsm(landscape = x,
 #                 what = what,
 #                 classes_max = 3,
