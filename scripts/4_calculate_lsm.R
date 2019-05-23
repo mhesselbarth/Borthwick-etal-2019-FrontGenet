@@ -15,7 +15,7 @@ clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
 # check if all rasters all loaded in memory
 all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 
-!all(purrr::map_lgl(clippings_pmm, raster::inMemory))
+# !all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 
 # extract names
 names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
@@ -101,8 +101,8 @@ landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   const = list(what = landscape,
                                                classes_max = 3),
                                   n_jobs = length(clippings_pmm),
-                                  template = list(queue = "medium",
-                                                  walltime = "48:00:00",
+                                  template = list(queue = "fat",
+                                                  walltime = "06:00:00",
                                                   processes = 1))
 
 # helpeR::save_rds(object = landscape_metrics,
