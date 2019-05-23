@@ -339,12 +339,13 @@ dist.m <- as.matrix(dist(spoints@coords, method = "euclidean",
 
 # save all to disk or not
 to_disk <- FALSE
+
 rasterOptions(todisk = to_disk)
 
 # Loop for all sampling points
 clippings <- purrr::map(1:length(id), function(focal_plot) {
 
-  cat(paste0("\rProgress: ", focal_plot , " from ", length(id)))
+  cat(paste0("\r> Progress: ", focal_plot , " from ", length(id)))
     
   non_focal_ids <- which(id != focal_plot & id > focal_plot)
   
@@ -363,7 +364,7 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
     
     # distance between the sampling points below 4000 
     # which is the maxium distance the model is trained for
-    if(dist.m[focal_plot,other_plot] < 4000) { 
+    if (dist.m[focal_plot,other_plot] < 4000) { 
       
       # Use the trained model to predict the radii using the acutal distance between
       # the two samplings points as explanatory variable
@@ -374,7 +375,7 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
     }
     
     # Distance larger than model trained for
-    if(dist.m[focal_plot,other_plot] >= 4000) {
+    if (dist.m[focal_plot,other_plot] >= 4000) {
       A <- 60/100 * dist.m[focal_plot,other_plot]
       B <- 40/100 * dist.m[focal_plot,other_plot]
     }
@@ -400,7 +401,7 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
     Elands  <- crop(input_layer, Epolygon)
     Elands <- mask(Elands, Epolygon) # Crop to extend of Emask
     
-    if(!to_disk){
+    if (!to_disk) {
       Elands <- readAll(Elands) # make sure read to memory
     }
     

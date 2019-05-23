@@ -3,25 +3,32 @@ library(clustermq)
 library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
 library(landscapemetrics)
 library(raster)
+library(sp)
 library(tidyverse)
 
 source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
+source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
 
-# load the clippings
-clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
+#### Load data ####
 
-# clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd_disk.rds"))
+# # load the clippings
+# clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
+# 
+# # check if all rasters all loaded in memory
+# all(purrr::map_lgl(clippings_pmm, raster::inMemory))
+# 
+# # extract names
+# names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
+# 
+# names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
-# check if all rasters all loaded in memory
-all(purrr::map_lgl(clippings_pmm, raster::inMemory))
+# load input layer
+nlcd_layer <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified.rds"))
 
-# !all(purrr::map_lgl(clippings_pmm, raster::inMemory))
+# load sampling points
+sampling_points <- raster::shapefile(paste0(getwd(), "/data/GIS/SSR_17_sites.shp"))
 
-# extract names
-names_clippings <- purrr::map_chr(clippings_pmm, function(x) names(x))
-
-names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
-
+# specify metrics
 landscape_sub <- c("lsm_l_ai", 
                    "lsm_l_area_mn", 
                    "lsm_l_cai_mn", 
@@ -51,6 +58,7 @@ landscape_sub <- c("lsm_l_ai",
                    "lsm_l_ta", 
                    "lsm_l_te")
 
+#### Calculate locally ####
 # # Calculate metrics locally
 # landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
 #                                                      what = landscape_sub,
@@ -74,6 +82,7 @@ landscape_sub <- c("lsm_l_ai",
 #   return(result)
 # })
 
+#### clustermq ####
 # Calculate metrics on high performance cluster
 landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
                                   landscape = clippings_pmm,
@@ -125,7 +134,8 @@ write.table(landscape_metrics,
             sep = ";", dec = ".",
             row.names = FALSE)
 
-# # FUTURE for HPC
+#### FUTURE for HPC ####
+
 # # load the packages
 # library("future")
 # library("future.batchtools")
@@ -162,3 +172,15 @@ write.table(landscape_metrics,
 # 
 # future::resolved(future::futureOf(landscape_metrics))
 
+#### clustermq (clip_and_calc) ####
+
+landscape_metrics <- clustermq::Q(fun = clip_and_calc,
+                                  focal_plot = seq_along(sampling_points),
+                                  const = list(sampling_points = sampling_points,
+                                               raster = input_layer,
+                                               what = landscape_sub,
+                                               classes_max = 3),
+                                  n_jobs = length(sampling_points),
+                                  template = list(queue = "medium",
+                                                  walltime = "24:00:00",
+                                                  processes = 1))
