@@ -174,10 +174,11 @@ write.table(landscape_metrics,
 
 #### clustermq (clip_and_calc) ####
 
+# run metrics
 landscape_metrics <- clustermq::Q(fun = clip_and_calc,
                                   focal_plot = seq_along(sampling_points),
                                   const = list(sampling_points = sampling_points,
-                                               raster = input_layer,
+                                               raster = nlcd_layer,
                                                what = landscape_sub,
                                                classes_max = 3),
                                   n_jobs = length(sampling_points),
