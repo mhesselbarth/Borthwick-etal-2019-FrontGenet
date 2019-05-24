@@ -188,5 +188,5 @@ landscape_metrics <- clustermq::Q(fun = clip_and_calc,
                                                classes_max = 3),
                                   n_jobs = length(sampling_points),
                                   template = list(queue = "medium",
-                                                  walltime = "24:00:00",
+                                                  walltime = "01:00:00",
                                                   processes = 1))
