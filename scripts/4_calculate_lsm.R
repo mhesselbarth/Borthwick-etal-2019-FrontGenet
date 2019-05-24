@@ -174,9 +174,14 @@ write.table(landscape_metrics,
 
 #### clustermq (clip_and_calc) ####
 
+# get all combinations
+sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points), 
+                                           y = seq_along(sampling_points))
+
 # run metrics
 landscape_metrics <- clustermq::Q(fun = clip_and_calc,
-                                  focal_plot = seq_along(sampling_points),
+                                  focal_plot = sampling_ids[, 1],
+                                  other_plot = sampling_ids[, 2],
                                   const = list(sampling_points = sampling_points,
                                                raster = nlcd_layer,
                                                what = landscape_sub,
