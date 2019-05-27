@@ -23,7 +23,7 @@ source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
 # names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
 # load input layer
-nlcd_layer <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified.rds"))
+nlcd_layer <- readRDS(paste0(getwd(), "/data/Output/nlcd_reclassified.rds"))
 
 # load sampling points
 sampling_points <- raster::shapefile(paste0(getwd(), "/data/GIS/SSR_17_sites.shp"))
@@ -58,7 +58,7 @@ landscape_sub <- c("lsm_l_ai",
                    "lsm_l_ta", 
                    "lsm_l_te")
 
-#### Calculate locally ####
+# #### Calculate locally ####
 # # Calculate metrics locally
 # landscape_metrics <- landscapemetrics::calculate_lsm(clippings_pmm,
 #                                                      what = landscape_sub,
@@ -76,66 +76,66 @@ landscape_sub <- c("lsm_l_ai",
 #                           classes_max = 3,
 #                           verbose = FALSE,
 #                           progress = FALSE)
-#   
+# 
 #   gc(verbose = FALSE, reset = TRUE, full = TRUE)
-#   
+# 
 #   return(result)
 # })
-
-#### clustermq ####
+# 
+# #### clustermq ####
 # Calculate metrics on high performance cluster
-landscape_metrics <- clustermq::Q(fun = calculate_lsm_helper,
-                                  landscape = clippings_pmm,
-                                  const = list(what = landscape_sub,
-                                               classes_max = 3),
-                                  n_jobs = length(clippings_pmm),
-                                  template = list(queue = "fat",
-                                                  walltime = "06:00:00",
-                                                  processes = 1))
-
+# landscape_metrics <- helpeR::submit_to_cluster(fun = calculate_lsm_helper,
+#                                                landscape = clippings_pmm,
+#                                                const = list(what = landscape_sub,
+#                                                             classes_max = 3),
+#                                                n_jobs = length(clippings_pmm),
+#                                                template = list(queue = "fat",
+#                                                                walltime = "06:00:00",
+#                                                                processes = 1))
+# 
 # helpeR::save_rds(object = landscape_metrics,
 #                  filename = "landscape_metrics_raw.rds",
 #                  path = paste0(getwd(), "/data/output"),
 #                  overwrite = TRUE)
-
-# Rowbind returning list and add site names
-landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
-  dplyr::mutate(layer = as.integer(layer_bind_rows),
-                site_a = as.integer(names_clippings[layer, 2]),
-                site_b = as.integer(names_clippings[layer, 3])) %>%
-  dplyr::select(-layer_bind_rows)
-
-# Import sample points
-sample_points <- getwd() %>%
-  paste0("/data/GIS/SSR_17_sites.shp") %>%
-  raster::shapefile() %>%
-  tibble::as_tibble()
-
-# Calculate distance between each point
-distance_matrix <- sample_points %>%
-  dplyr::select(E, N) %>%
-  dist(diag = TRUE, upper = TRUE) %>%
-  as.matrix()
-
-# Add euclidean distance to each pair of sitres
-landscape_metrics <- dplyr::mutate(landscape_metrics,
-                                   euclidean_distance = distance_matrix[cbind(site_a, 
-                                                                              site_b)]) %>% 
-  dplyr::arrange(site_a, site_b)
-
-# Order and save results
-helpeR::save_rds(object = landscape_metrics, 
-                 filename = "landscape_metrics.rds", 
-                 path = paste0(getwd(), "/data/output"), 
-                 overwrite = FALSE)
-
-write.table(landscape_metrics,
-            file = paste0(getwd(), '/data/output/landscape_metrics.csv'),
-            sep = ";", dec = ".",
-            row.names = FALSE)
-
-#### FUTURE for HPC ####
-
+# 
+# # Rowbind returning list and add site names
+# landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
+#   dplyr::mutate(layer = as.integer(layer_bind_rows),
+#                 site_a = as.integer(names_clippings[layer, 2]),
+#                 site_b = as.integer(names_clippings[layer, 3])) %>%
+#   dplyr::select(-layer_bind_rows)
+# 
+# # Import sample points
+# sample_points <- getwd() %>%
+#   paste0("/data/GIS/SSR_17_sites.shp") %>%
+#   raster::shapefile() %>%
+#   tibble::as_tibble()
+# 
+# # Calculate distance between each point
+# distance_matrix <- sample_points %>%
+#   dplyr::select(E, N) %>%
+#   dist(diag = TRUE, upper = TRUE) %>%
+#   as.matrix()
+# 
+# # Add euclidean distance to each pair of sitres
+# landscape_metrics <- dplyr::mutate(landscape_metrics,
+#                                    euclidean_distance = distance_matrix[cbind(site_a, 
+#                                                                               site_b)]) %>% 
+#   dplyr::arrange(site_a, site_b)
+# 
+# # Order and save results
+# helpeR::save_rds(object = landscape_metrics, 
+#                  filename = "landscape_metrics.rds", 
+#                  path = paste0(getwd(), "/data/output"), 
+#                  overwrite = FALSE)
+# 
+# write.table(landscape_metrics,
+#             file = paste0(getwd(), '/data/output/landscape_metrics.csv'),
+#             sep = ";", dec = ".",
+#             row.names = FALSE)
+# 
+# #### FUTURE for HPC ####
+# 
 # # load the packages
 # library("future")
 # library("future.batchtools")
@@ -171,7 +171,7 @@ write.table(landscape_metrics,
 # })
 # 
 # future::resolved(future::futureOf(landscape_metrics))
-
+# 
 #### clustermq (clip_and_calc) ####
 
 # get all combinations
@@ -179,14 +179,14 @@ sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points),
                                            y = seq_along(sampling_points))
 
 # run metrics
-landscape_metrics <- clustermq::Q(fun = clip_and_calc,
-                                  focal_plot = sampling_ids[, 1],
-                                  other_plot = sampling_ids[, 2],
-                                  const = list(sampling_points = sampling_points,
-                                               input_layer = nlcd_layer,
-                                               what = landscape_sub,
-                                               classes_max = 3),
-                                  n_jobs = length(sampling_points),
-                                  template = list(queue = "medium",
-                                                  walltime = "48:00:00",
-                                                  processes = 1))
+landscape_metrics <- helpeR::submit_to_cluster(fun = clip_and_calc,
+                                               focal_plot = sampling_ids[, 1],
+                                               other_plot = sampling_ids[, 2],
+                                               const = list(sampling_points = sampling_points,
+                                                            input_layer = nlcd_layer,
+                                                            what = "lsm_l_ta",
+                                                            classes_max = 3),
+                                               n_jobs = nrow(sampling_ids[1:10, ]),
+                                               template = list(queue = "medium",
+                                                               walltime = "48:00:00",
+                                                               processes = 1))

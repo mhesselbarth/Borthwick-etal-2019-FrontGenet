@@ -6,7 +6,7 @@ clip_and_calc <- function(focal_plot, other_plot,
                                     diag = TRUE, upper = TRUE)) 
   
   dist <- distance_matrix[focal_plot, other_plot]
-    
+  
   # center of ellipse between point focal_plot and other_plot
   center_x <- (sampling_points@coords[focal_plot, 1] + 
                  sampling_points@coords[other_plot, 1]) / 2 #Ellipse center x
@@ -54,21 +54,25 @@ clip_and_calc <- function(focal_plot, other_plot,
   ellipsoid <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(cbind(x_coords, 
                                                                             y_coords))), 
                                                      ID = 1)))
-
+  
   # clip to ellipsoid
   input_layer  <- raster::crop(input_layer, ellipsoid)
   
   # crop to extent of ellipsoid
   input_layer <- raster::mask(input_layer, ellipsoid) 
   
-  result <- landscapemetrics::calculate_lsm(input_layer, ...)
+  result <- landscapemetrics::calculate_lsm(input_layer, verbose = FALSE, ...)
   
   # add site information
-  result$site_a <- focal_plot
+  result <- dplyr::mutate(site_a = focal_plot, 
+                          site_b = other_plot, 
+                          euclidean_distance = dist)
   
-  result$site_b <- other_plot
-  
-  result$euclidean_distance = dist
+  # result$site_a <- focal_plot
+  # 
+  # result$site_b <- other_plot
+  # 
+  # result$euclidean_distance <- dist
   
   return(result)
 }
