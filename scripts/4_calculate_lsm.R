@@ -13,7 +13,7 @@ source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
 
 # # load the clippings
 # clippings_pmm <- readRDS(paste0(getwd(), "/data/output/clippings_pmm_nlcd.rds"))
-# 
+
 # # check if all rasters all loaded in memory
 # all(purrr::map_lgl(clippings_pmm, raster::inMemory))
 # 
@@ -183,10 +183,10 @@ landscape_metrics <- clustermq::Q(fun = clip_and_calc,
                                   focal_plot = sampling_ids[, 1],
                                   other_plot = sampling_ids[, 2],
                                   const = list(sampling_points = sampling_points,
-                                               raster = nlcd_layer,
+                                               input_layer = nlcd_layer,
                                                what = landscape_sub,
                                                classes_max = 3),
                                   n_jobs = length(sampling_points),
                                   template = list(queue = "medium",
-                                                  walltime = "01:00:00",
+                                                  walltime = "48:00:00",
                                                   processes = 1))

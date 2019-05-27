@@ -1,5 +1,5 @@
 clip_and_calc <- function(focal_plot, other_plot, 
-                          sampling_points, raster, ...) {
+                          sampling_points, input_layer, ...) {
   
   # calculate distance matrix
   distance_matrix <- as.matrix(dist(sampling_points@coords, method = "euclidean", 
@@ -7,14 +7,14 @@ clip_and_calc <- function(focal_plot, other_plot,
   
   dist <- distance_matrix[focal_plot, other_plot]
     
-  # Center of ellipse between point focal_plot and other_plot
+  # center of ellipse between point focal_plot and other_plot
   center_x <- (sampling_points@coords[focal_plot, 1] + 
                  sampling_points@coords[other_plot, 1]) / 2 #Ellipse center x
   
   center_y <- (sampling_points@coords[focal_plot, 2] + 
                  sampling_points@coords[other_plot, 2]) / 2 #Ellipse center y
   
-  # Angle of ellipsoid
+  # angle of ellipsoid
   ellipsoid_angle  <- atan((sampling_points@coords[other_plot, 2] - 
                               sampling_points@coords[focal_plot, 2]) / 
                              (sampling_points@coords[other_plot, 1] - 
@@ -24,7 +24,7 @@ clip_and_calc <- function(focal_plot, other_plot,
   # which is the maxium distance the model is trained for
   if (dist < 4000) { 
     
-    # Use the trained model to predict the radii using the acutal distance between
+    # use the trained model to predict the radii using the acutal distance between
     # the two samplings points as explanatory variable
     radius_a <- (exp(-0.001163 * distance_matrix[focal_plot,other_plot] + 
                        5.366365) + 60) / 100 * distance_matrix[focal_plot, other_plot]
@@ -33,7 +33,7 @@ clip_and_calc <- function(focal_plot, other_plot,
                        5.600736) + 40) / 100 * distance_matrix[focal_plot, other_plot]
   }
   
-  # Distance larger than model trained for
+  # distance larger than model trained for
   if (dist >= 4000) {
     
     radius_a <- 60 / 100 * distance_matrix[focal_plot, other_plot]
@@ -41,7 +41,7 @@ clip_and_calc <- function(focal_plot, other_plot,
     radius_b <- 40 / 100 * distance_matrix[focal_plot, other_plot]
   }
   
-  # Calculate ellipsoid using the model prediction
+  # calculate ellipsoid using the model prediction
   radian <- seq(0,2 * pi, length.out = 360)
   
   x_coords <- center_x + radius_a * cos(radian) * 
@@ -55,16 +55,20 @@ clip_and_calc <- function(focal_plot, other_plot,
                                                                             y_coords))), 
                                                      ID = 1)))
 
-  # Clipping Ellipse
-  # Emask   <- rasterize(Epolygon, input_layer)
-  ellipsoid_cropped  <- raster::crop(input_layer, ellipsoid)
+  # clip to ellipsoid
+  input_layer  <- raster::crop(input_layer, ellipsoid)
   
-  ellipsoid_cropped <- raster::mask(ellipsoid_cropped, ellipsoid) # Crop to extend of Emask
+  # crop to extent of ellipsoid
+  input_layer <- raster::mask(input_layer, ellipsoid) 
   
-  result <- landscapemetrics::calculate_lsm(ellipsoid_cropped, ...)
+  result <- landscapemetrics::calculate_lsm(input_layer, ...)
   
-  result <- dplyr::mutate(result, 
-                          site_a = focal_plot,
-                          site_b = other_plot,
-                          euclidean_distance = dist)
+  # add site information
+  result$site_a <- focal_plot
+  
+  result$site_b <- other_plot
+  
+  result$euclidean_distance = dist
+  
+  return(result)
 }
