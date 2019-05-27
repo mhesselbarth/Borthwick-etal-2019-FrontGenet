@@ -184,9 +184,14 @@ landscape_metrics <- helpeR::submit_to_cluster(fun = clip_and_calc,
                                                other_plot = sampling_ids[, 2],
                                                const = list(sampling_points = sampling_points,
                                                             input_layer = nlcd_layer,
-                                                            what = "lsm_l_ta",
+                                                            what = "landscape",
                                                             classes_max = 3),
-                                               n_jobs = nrow(sampling_ids[1:10, ]),
+                                               n_jobs = nrow(sampling_ids),
                                                template = list(queue = "medium",
                                                                walltime = "48:00:00",
                                                                processes = 1))
+
+helpeR::save_rds(object = landscape_metrics,
+                 filename = "landscape_metrics_raw.rds",
+                 path = paste0(getwd(), "/data/Output"),
+                 overwrite = TRUE)
