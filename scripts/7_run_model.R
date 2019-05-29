@@ -231,6 +231,9 @@ info_surface_metrics_REML <- get_model_info(model = surface_metrics_models_list,
 # import data landscape metrics
 landscape_metrics <- readr::read_rds("data/Output/landscape_metrics.rds")
 
+# only landscape level metrics
+landscape_metrics <- dplyr::filter(landscape_metrics, level == "landscape")
+
 # import RST value
 rst <- readr::read_rds("data/rst.rds")
 
@@ -238,16 +241,11 @@ rst <- readr::read_rds("data/rst.rds")
 landscape_metrics <- dplyr::left_join(landscape_metrics, rst, 
                                       by = c("site_a" = "site_1", "site_b" = "site_2"))
 
-# add distance
-landscape_metrics <- dplyr::mutate(landscape_metrics,
-                                   euclidean_distance = distance_matrix[cbind(site_a, 
-                                                                              site_b)]) %>% 
-  dplyr::arrange(site_a, site_b)
-
 # only metrics on landscape level and needed cols
-landscape_metrics <- dplyr::filter(landscape_metrics, 
-                                   level == "landscape") %>%
-  dplyr::select(site_a, site_b, metric, value, RST, euclidean_distance)
+landscape_metrics <- dplyr::select(landscape_metrics, 
+                                   site_a, site_b, 
+                                   metric, value, 
+                                   RST, euclidean_distance)
 
 # reshape to wide format
 landscape_metrics <- tidyr::spread(landscape_metrics, 

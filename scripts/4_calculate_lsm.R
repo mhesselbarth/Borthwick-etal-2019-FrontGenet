@@ -175,7 +175,7 @@ landscape_sub <- c("lsm_l_ai",
 #### clustermq (clip_and_calc) ####
 
 # get all combinations
-sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points), 
+sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points),
                                            y = seq_along(sampling_points))
 
 # run metrics
@@ -188,10 +188,64 @@ landscape_metrics <- helpeR::submit_to_cluster(fun = clip_and_calc,
                                                             classes_max = 3),
                                                n_jobs = nrow(sampling_ids),
                                                template = list(queue = "medium",
-                                                               walltime = "48:00:00",
+                                                               walltime = "24:00:00",
+                                                               mem_cpu = "12G",
                                                                processes = 1))
 
 helpeR::save_rds(object = landscape_metrics,
                  filename = "landscape_metrics_raw.rds",
                  path = paste0(getwd(), "/data/Output"),
-                 overwrite = TRUE)
+                 overwrite = FALSE)
+
+# bind to one dataframe 
+landscape_metrics <- dplyr::bind_rows(landscape_metrics)
+
+# replace layer with 1:136
+landscape_metrics$layer <- rep(x = 1:nrow(sampling_ids), 
+                               each = length(unique(landscape_metrics$metric)))
+
+helpeR::save_rds(object = landscape_metrics,
+                 filename = "landscape_metrics.rds",
+                 path = paste0(getwd(), "/data/Output"),
+                 overwrite = FALSE)
+
+#### FUTURE (clip and calc) ####
+
+# load the packages
+# library("future")
+# library("future.batchtools")
+# library("furrr")
+# 
+# # now we specify a future topology that fits our HPC
+# # login node -> cluster nodes -> core/ multiple cores
+# login <- tweak(future::remote,
+#                workers = "gwdu103.gwdg.de",
+#                user = "hesselbarth3") # user = login credential
+# 
+# sbatch <- tweak(future.batchtools::batchtools_slurm,
+#                 template = "future_slurm.tmpl",
+#                 resources = list(job.name = "calculate_lsm", # name of the job
+#                                  log.file = "calculate_lsm.log", # name of log file
+#                                  queue = "medium", # which partition
+#                                  service = "normal", # which QOS
+#                                  walltime = "06:00:00", # walltime <hh:mm:ss>
+#                                  processes = 1)) # number of cores
+# 
+# future::plan(list(login, sbatch, future::sequential)) # how to run on nodes, could also be sequential
+# 
+# # no max size of globals
+# options(future.globals.maxSize = Inf)
+# 
+# sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points), 
+#                                            y = seq_along(sampling_points))
+#                                            
+# landscape_metrics %<-% furrr::future_map2(sampling_ids[, 1], sampling_ids[, 2], 
+#                                           function(x, y) {
+#                                             clip_and_calc(focal_plot = x, 
+#                                                           other_plot = y, 
+#                                                           sampling_points = sampling_points,
+#                                                           input_layer = nlcd_layer, 
+#                                                           what = "landscape", 
+#                                                           classes_max = 3)})
+# 
+# future::resolved(future::futureOf(landscape_metrics))
