@@ -171,14 +171,15 @@ distance_resistance <- gdistance::commuteDistance(x = transition_conductance_sur
 
 # save distances in tibble
 distance_resistance_df <- tibble::tibble(site_1 = site_ids[, 1], site_2 = site_ids[, 2],
-                                         resistance = as.numeric(distance_resistance))
+                                         resistance = as.numeric(distance_resistance)) %>% 
+  dplyr::left_join(rst, by = c("site_1", "site_2"))
 
 # calculate correlation between distances
-distance_correlation <- cor(x = distance_cost_df$least_cost,
+distance_correlation <- cor(x = distance_least_cost_df$least_cost,
                             y = distance_resistance_df$resistance,
                             method = "spearman")
 
-plot(distance_cost_df$least_cost ~ distance_resistance_df$resistance)
+plot(distance_least_cost_df$least_cost ~ distance_resistance_df$resistance)
 
 #### Run models #### 
 
@@ -193,7 +194,7 @@ MuMIn::r.squaredGLMM(modell_least_cost_REML)
 MuMIn::AICc(modell_least_cost_REML)
 
 # # resistance model
-modell_resistance_REML <- modular_function(variables = RST ~ least_cost + (1|site_1),
+modell_resistance_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
                                            data = distance_resistance_df,
                                            REML = TRUE)
 
