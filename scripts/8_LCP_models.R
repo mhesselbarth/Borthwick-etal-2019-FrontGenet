@@ -13,7 +13,7 @@ source("scripts/0_modular_functions.R")
 #### load data ####
 
 # habitat surface
-habitat_surface <- raster::raster("data/GIS/habitat_surface.tif")
+habitat_surface <- raster::raster("data/GIS/Habitat_surface.tif")
 
 # Rst 
 rst <- readr::read_rds("data/rst.rds")
@@ -23,7 +23,6 @@ sites <- raster::shapefile("data/GIS/SSR_17_sites.shp")
 
 # conductance values
 conductance_surface <- raster::raster("data/GIS/tv_cond.tif")
-
 
 #### Pre-processing of data ####
 
@@ -98,6 +97,11 @@ transition_conductance_surface <- gdistance::geoCorrection(x = transition_conduc
 distance_least_cost <- gdistance::costDistance(x = transition_conductance_surface,
                                                fromCoords = sites)
 
+# save results
+helpeR::save_rds(object = distance_least_cost, 
+                 filename = "distance_least_cost.rds", 
+                 path = "data/Output/", overwrite = FALSE)
+
 distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1, 
                                          site_2 = site_ids$site_2, 
                                          least_cost = as.numeric(distance_least_cost)) %>% 
@@ -106,6 +110,11 @@ distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1,
 # calculate resistance distances (this takes some time)
 distance_resistance <- gdistance::commuteDistance(x = transition_conductance_surface,
                                                   coords = sites)
+
+# save results
+helpeR::save_rds(object = distance_resistance, 
+                 filename = "distance_resistance.rds", 
+                 path = "data/Output/", overwrite = FALSE)
 
 # save distances in tibble
 distance_resistance_df <- tibble::tibble(site_1 = site_ids$site_1, 
