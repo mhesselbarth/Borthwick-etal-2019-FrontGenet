@@ -7,76 +7,8 @@ library(raster)
 library(spdep)
 library(tidyverse)
 
-#### load modular functions ####
-
-# load modelling functions
-# model optimization function
-modular_function <- function(variables, data, REML = TRUE,
-                             ZZ = NULL, call = NULL) {
-  
-  # parse the data and formula
-  model <- lme4::lFormula(variables, data = data, REML = REML)
-  
-  if (!is.null(ZZ)) {
-    
-    # replace ZZ matrix
-    model$reTrms$Zt <- ZZ
-    
-    message("> Replaced 'model$reTrms$Zt <- ZZ'")
-  }
-  
-  # create the deviance function to be optimized
-  deviance_function <- do.call(lme4::mkLmerDevfun, model)
-  
-  # optimize the deviance function:
-  optimization <- lme4::optimizeLmer(deviance_function)
-  
-  # package up the results
-  model <- lme4::mkMerMod(rho = environment(deviance_function),
-                          opt = optimization,
-                          reTrms = model$reTrms,
-                          fr = model$fr)
-  
-  if (!is.null(call)) {
-    
-    # replace call for dredging
-    model@call <- call
-    
-    message("> Replaced 'model@call <- call'")
-    
-  }
-  
-  return(model)
-}
-
-get_model_info <- function(model, n) {
-  
-  # getting AIC and r2
-  # should we use extractAIC here ?
-  information_criterion <- purrr::map_dfr(model, function(x) {
-    
-    ic <- tibble::tibble(AIC = AIC(x),
-                         BIC = BIC(x),
-                         log_like = attr(logLik(x), "df"))
-    
-    r2 <- MuMIn::r.squaredGLMM(x)
-    
-    ic <- dplyr::mutate(ic, 
-                        r2_marginal = r2[1, 1], 
-                        r2_conditional = r2[1, 2])
-  }, .id = "model")
-  
-  # calculating corrected AICc and BICc and weights
-  information_criterion <- dplyr::mutate(information_criterion,
-                                         AICc = AIC + 2 * log_like *
-                                           (log_like + 1) / (n - log_like - 1),
-                                         AICc_ew = exp(-0.5 * (AICc - min(AICc))) /
-                                           sum(exp(-0.5 * (AICc - min(AICc)))),
-                                         BIC_ew = exp(-0.5 * (BIC - min(BIC))) /
-                                           sum(exp(-0.5 * (BIC - min(BIC)))))
-  
-  return(information_criterion)
-}
+# source modular functions
+source("scripts/0_modular_functions.R")
 
 #### load data ####
 
@@ -102,11 +34,8 @@ site_ids <- helpeR::expand_grid_unique(x = seq_along(sites),
   tibble::as_tibble() %>% 
   purrr::set_names("site_1", "site_2")
 
-# Create Zl and ZZ matrix
-Zl_matrix <- lapply(c("site_1", "site_2"), function(x) {
-  Matrix::fac2sparse(site_ids[[x]], "d", drop = FALSE)})
-
-ZZ_matrix <- Reduce("+", Zl_matrix[-1], Zl_matrix[[1]])
+# Create ZZ matrix
+ZZ_matrix <- create_ZZ(data = site_ids, col_names = c("site_1", "site_2"))
 
 # make sure no negative values are present by addind minimum value
 habitat_surface[] <- habitat_surface[] + ceiling(abs(min(habitat_surface[], 
