@@ -90,14 +90,23 @@ rst <- readr::read_rds("data/rst.rds")
 sites <- raster::shapefile("data/GIS/SSR_17_sites.shp")
 
 # conductance values
-conductance_surface <- raster::raster("data/TV_maps_data/tv_cond.tif")
+conductance_surface <- raster::raster("data/GIS/tv_cond.tif")
 
 
 #### Pre-processing of data ####
 
 # create ids
 site_ids <- helpeR::expand_grid_unique(x = seq_along(sites), 
-                                       y = seq_along(sites))
+                                       y = seq_along(sites)) %>%
+  as.data.frame() %>%
+  tibble::as_tibble() %>% 
+  purrr::set_names("site_1", "site_2")
+
+# Create Zl and ZZ matrix
+Zl_matrix <- lapply(c("site_1", "site_2"), function(x) {
+  Matrix::fac2sparse(site_ids[[x]], "d", drop = FALSE)})
+
+ZZ_matrix <- Reduce("+", Zl_matrix[-1], Zl_matrix[[1]])
 
 # make sure no negative values are present by addind minimum value
 habitat_surface[] <- habitat_surface[] + ceiling(abs(min(habitat_surface[], 
@@ -160,17 +169,18 @@ transition_conductance_surface <- gdistance::geoCorrection(x = transition_conduc
 distance_least_cost <- gdistance::costDistance(x = transition_conductance_surface,
                                                fromCoords = sites)
 
-distance_least_cost_df <- tibble::tibble(site_1 = site_ids[, 1], 
-                                         site_2 = site_ids[, 2], 
+distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1, 
+                                         site_2 = site_ids$site_2, 
                                          least_cost = as.numeric(distance_least_cost)) %>% 
   dplyr::left_join(rst, by = c("site_1", "site_2"))
 
-# # calculate resistance distances (this takes some time)
+# calculate resistance distances (this takes some time)
 distance_resistance <- gdistance::commuteDistance(x = transition_conductance_surface,
                                                   coords = sites)
 
 # save distances in tibble
-distance_resistance_df <- tibble::tibble(site_1 = site_ids[, 1], site_2 = site_ids[, 2],
+distance_resistance_df <- tibble::tibble(site_1 = site_ids$site_1, 
+                                         site_2 = site_ids$site_2,
                                          resistance = as.numeric(distance_resistance)) %>% 
   dplyr::left_join(rst, by = c("site_1", "site_2"))
 
@@ -187,7 +197,8 @@ plot(distance_least_cost_df$least_cost ~ distance_resistance_df$resistance)
 # MH: I think we want REML = TRUE since we are not dredging the model
 modell_least_cost_REML <- modular_function(variables = RST ~ least_cost + (1|site_1), 
                                            data = distance_least_cost_df, 
-                                           REML = TRUE)
+                                           REML = TRUE, 
+                                           ZZ = ZZ_matrix)
 
 summary(modell_least_cost_REML)
 MuMIn::r.squaredGLMM(modell_least_cost_REML)
@@ -196,7 +207,8 @@ MuMIn::AICc(modell_least_cost_REML)
 # # resistance model
 modell_resistance_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
                                            data = distance_resistance_df,
-                                           REML = TRUE)
+                                           REML = TRUE, 
+                                           ZZ = ZZ_matrix)
 
 summary(modell_resistance_REML)
 MuMIn::r.squaredGLMM(modell_resistance_REML)
