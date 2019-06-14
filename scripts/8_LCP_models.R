@@ -40,10 +40,6 @@ ZZ_matrix <- create_ZZ(data = site_ids, col_names = c("site_1", "site_2"))
 habitat_surface[] <- habitat_surface[] + ceiling(abs(min(habitat_surface[], 
                                                          na.rm = TRUE)))
 
-# create cost surface
-# MH: Why are we never using this again?
-# cost_surface <- 1 / habitat_surface 
-
 # calculate transition path
 transition_conductance_surface <- gdistance::transition(x = conductance_surface, 
                                                         transitionFunction = mean, directions = 8)
@@ -102,6 +98,9 @@ helpeR::save_rds(object = distance_least_cost,
                  filename = "distance_least_cost.rds", 
                  path = "data/Output/", overwrite = FALSE)
 
+# read already computed data
+# distance_least_cost <- readr::read_rds("data/Output/distance_least_cost.rds")
+
 distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1, 
                                          site_2 = site_ids$site_2, 
                                          least_cost = as.numeric(distance_least_cost)) %>% 
@@ -115,6 +114,9 @@ distance_resistance <- gdistance::commuteDistance(x = transition_conductance_sur
 helpeR::save_rds(object = distance_resistance, 
                  filename = "distance_resistance.rds", 
                  path = "data/Output/", overwrite = FALSE)
+
+# read already computed data
+# distance_resistance <- readr::read_rds("data/Output/distance_resistance.rds")
 
 # save distances in tibble
 distance_resistance_df <- tibble::tibble(site_1 = site_ids$site_1, 
@@ -142,7 +144,7 @@ summary(modell_least_cost_REML)
 MuMIn::r.squaredGLMM(modell_least_cost_REML)
 MuMIn::AICc(modell_least_cost_REML)
 
-# # resistance model
+# resistance model
 modell_resistance_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
                                            data = distance_resistance_df,
                                            REML = TRUE, 
@@ -151,13 +153,3 @@ modell_resistance_REML <- modular_function(variables = RST ~ resistance + (1|sit
 summary(modell_resistance_REML)
 MuMIn::r.squaredGLMM(modell_resistance_REML)
 MuMIn::AICc(modell_resistance_REML)
-
-#### Calculate AIC weights #### 
-
-# x <- c(exp(-0.5*0),exp(-0.5*8.6),exp(-0.5*15.2),exp(-0.5*13.1),exp(-0.5*2.1))
-# x[1]/sum(x)
-# x[2]/sum(x)
-# x[3]/sum(x)
-# x[4]/sum(x)
-# x[5]/sum(x)
-
