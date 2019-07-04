@@ -90,16 +90,16 @@ transition_conductance_surface <- gdistance::geoCorrection(x = transition_conduc
 # }
 
 # calculate least-cost distances
-distance_least_cost <- gdistance::costDistance(x = transition_conductance_surface,
-                                               fromCoords = sites)
-
-# save results
-helpeR::save_rds(object = distance_least_cost, 
-                 filename = "distance_least_cost.rds", 
-                 path = "data/Output/", overwrite = FALSE)
+# distance_least_cost <- gdistance::costDistance(x = transition_conductance_surface,
+#                                                fromCoords = sites)
+# 
+# # save results
+# helpeR::save_rds(object = distance_least_cost, 
+#                  filename = "distance_least_cost.rds", 
+#                  path = "data/Output/", overwrite = FALSE)
 
 # read already computed data
-# distance_least_cost <- readr::read_rds("data/Output/distance_least_cost.rds")
+distance_least_cost <- readr::read_rds("data/Output/distance_least_cost.rds")
 
 distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1, 
                                          site_2 = site_ids$site_2, 
@@ -107,16 +107,16 @@ distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1,
   dplyr::left_join(rst, by = c("site_1", "site_2"))
 
 # calculate resistance distances (this takes some time)
-distance_resistance <- gdistance::commuteDistance(x = transition_conductance_surface,
-                                                  coords = sites)
-
-# save results
-helpeR::save_rds(object = distance_resistance, 
-                 filename = "distance_resistance.rds", 
-                 path = "data/Output/", overwrite = FALSE)
+# distance_resistance <- gdistance::commuteDistance(x = transition_conductance_surface,
+#                                                   coords = sites)
+# 
+# # save results
+# helpeR::save_rds(object = distance_resistance, 
+#                  filename = "distance_resistance.rds", 
+#                  path = "data/Output/", overwrite = FALSE)
 
 # read already computed data
-# distance_resistance <- readr::read_rds("data/Output/distance_resistance.rds")
+distance_resistance <- readr::read_rds("data/Output/distance_resistance.rds")
 
 # save distances in tibble
 distance_resistance_df <- tibble::tibble(site_1 = site_ids$site_1, 
@@ -136,20 +136,36 @@ plot(distance_least_cost_df$least_cost ~ distance_resistance_df$resistance)
 # least distance cost model
 # MH: I think we want REML = TRUE since we are not dredging the model
 modell_least_cost_REML <- modular_function(variables = RST ~ least_cost + (1|site_1), 
-                                           data = distance_least_cost_df, 
-                                           REML = TRUE, 
-                                           ZZ = ZZ_matrix)
+                                           data = distance_least_cost_df,
+                                           ZZ = ZZ_matrix, 
+                                           REML = TRUE)
 
-summary(modell_least_cost_REML)
-MuMIn::r.squaredGLMM(modell_least_cost_REML)
-MuMIn::AICc(modell_least_cost_REML)
+modell_least_cost_NO_REML <- modular_function(variables = RST ~ least_cost + (1|site_1), 
+                                              data = distance_least_cost_df,
+                                              ZZ = ZZ_matrix, 
+                                              REML = FALSE)
+
+# get model info
+info_least_cost <- get_model_info(list(REML = modell_least_cost_REML,
+                                       NO_REML = modell_least_cost_NO_REML), 
+                                  n = 136)
 
 # resistance model
 modell_resistance_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
                                            data = distance_resistance_df,
-                                           REML = TRUE, 
-                                           ZZ = ZZ_matrix)
+                                           ZZ = ZZ_matrix,
+                                           REML = TRUE)
 
-summary(modell_resistance_REML)
-MuMIn::r.squaredGLMM(modell_resistance_REML)
-MuMIn::AICc(modell_resistance_REML)
+modell_resistance_NO_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
+                                              data = distance_resistance_df,
+                                              ZZ = ZZ_matrix,
+                                              REML = FALSE)
+
+# get model info
+info_resistance <- get_model_info(list(REML = modell_resistance_REML,
+                                       NO_REML = modell_resistance_NO_REML),
+                                  n = 136)
+
+#### Compare all models ####
+info_least_cost
+info_resistance

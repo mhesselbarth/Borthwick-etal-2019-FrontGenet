@@ -90,8 +90,8 @@ surface_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ Sa_scaled +
                                                    S10z_scaled + Ssk_scaled + 
                                                    Sdr_scaled + Sbi_scaled + 
                                                    Std_scaled + Stdi_scaled + 
-                                                   Sfd_scaled + Srwi_scaled + 
-                                                   dist_scaled + (1|site_1), 
+                                                   Sfd_scaled + Srwi_scaled +
+                                                   (1|site_1), 
                                                  data = surface_metrics, 
                                                  REML = FALSE, na.action = "na.fail")
 
@@ -105,7 +105,7 @@ surface_metrics_model_full_no_REML <- modular_function(variables = RST ~ Sa_scal
                                                          Sbi_scaled + 
                                                          Std_scaled + Stdi_scaled +
                                                          Sfd_scaled + 
-                                                         Srwi_scaled + dist_scaled + 
+                                                         Srwi_scaled + 
                                                          (1|site_1), 
                                                        data = surface_metrics, 
                                                        REML = FALSE, 
@@ -129,36 +129,62 @@ model_dredge_surface_no_REML <- MuMIn::dredge(surface_metrics_model_full_no_REML
   head(n = 5)
 
 # fit best model
-surface_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled + 
-                                                S10z_scaled + Sfd_scaled + 
-                                                Stdi_scaled + (1|site_1),
+surface_metrics_best_REML <- modular_function(variables = RST ~ Sa_scaled + 
+                                                Sfd_scaled + Stdi_scaled + 
+                                                (1|site_1),
                                               data = surface_metrics,
                                               ZZ = ZZ_surface,
                                               REML = TRUE)
 
-surface_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled + 
-                                                  S10z_scaled +  Ssk_scaled + 
+surface_metrics_best_NO_REML <- modular_function(variables = RST ~ Sa_scaled + 
+                                                   Sfd_scaled + Stdi_scaled + 
+                                                   (1|site_1),
+                                                 data = surface_metrics,
+                                                 ZZ = ZZ_surface,
+                                                 REML = FALSE)
+
+surface_metrics_second_REML <- modular_function(variables = RST ~ + Sfd_scaled +
                                                   Stdi_scaled + (1|site_1),
                                                 data = surface_metrics,
                                                 ZZ = ZZ_surface,
                                                 REML = TRUE)
 
-surface_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled + 
-                                                 S10z_scaled + Sfd_scaled + 
-                                                 Ssk_scaled + Stdi_scaled + 
+surface_metrics_second_NO_REML <- modular_function(variables = RST ~ + Sfd_scaled +
+                                                     Stdi_scaled + (1|site_1),
+                                                   data = surface_metrics,
+                                                   ZZ = ZZ_surface,
+                                                   REML = FALSE)
+
+surface_metrics_third_REML <- modular_function(variables = RST ~ Sfd_scaled + 
+                                                 Std_scaled + Stdi_scaled + 
                                                  (1|site_1),
                                                data = surface_metrics,
                                                ZZ = ZZ_surface,
                                                REML = TRUE)
 
+surface_metrics_third_NO_REML <- modular_function(variables = RST ~ Sfd_scaled + 
+                                                    Std_scaled + Stdi_scaled + 
+                                                    (1|site_1),
+                                                  data = surface_metrics,
+                                                  ZZ = ZZ_surface,
+                                                  REML = FALSE)
+
 # combine to one list
-surface_metrics_models_list <- list(best = surface_metrics_best_REML, 
-                                    second = surface_metrics_second_REML, 
-                                    third = surface_metrics_third_REML)
+surface_metrics_models_list_REML <- list(best = surface_metrics_best_REML, 
+                                         second = surface_metrics_second_REML, 
+                                         third = surface_metrics_third_REML)
+
+surface_metrics_models_list_NO_REML <- list(best = surface_metrics_best_NO_REML, 
+                                         second = surface_metrics_second_NO_REML, 
+                                         third = surface_metrics_third_NO_REML)
 
 # get model info
-info_surface_metrics_REML <- get_model_info(model = surface_metrics_models_list,
+info_surface_metrics_REML <- get_model_info(model = surface_metrics_models_list_REML,
                                             n = 136)
+
+info_surface_metrics_NO_REML <- get_model_info(model = surface_metrics_models_list_NO_REML,
+                                               n = 136)
+
 #### Patch metrics ####
 
 # import data landscape metrics
@@ -216,8 +242,8 @@ landscape_metrics <- dplyr::mutate(landscape_metrics,
 landscape_metrics_model_full_no_REML <- lme4::lmer(formula = RST ~ pd_scaled + 
                                                      iji_scaled + prd_scaled + 
                                                      core_mn_scaled + cai_mn_scaled + 
-                                                     split_scaled + mesh_scaled +
-                                                     dist_scaled + (1|site_a), 
+                                                     split_scaled + mesh_scaled + 
+                                                     (1|site_a), 
                                                    data = landscape_metrics, 
                                                    REML = FALSE, 
                                                    na.action = "na.fail")
@@ -230,7 +256,7 @@ landscape_metrics_model_full_no_REML <- modular_function(variables = RST ~ pd_sc
                                                            iji_scaled + prd_scaled + 
                                                            core_mn_scaled + cai_mn_scaled + 
                                                            split_scaled + mesh_scaled + 
-                                                           dist_scaled + (1|site_a), 
+                                                           (1|site_a), 
                                                          data = landscape_metrics,
                                                          REML = FALSE,
                                                          ZZ = ZZ_landscape, 
@@ -253,34 +279,59 @@ model_dredge_landscape_no_REML <- MuMIn::dredge(landscape_metrics_model_full_no_
   head(n = 5)
 
 # fit best model
-landscape_metrics_best_REML <- modular_function(variables = RST ~ dist_scaled +
-                                                  mesh_scaled + (1|site_a),
+landscape_metrics_best_REML <- modular_function(variables = RST ~ mesh_scaled +
+                                                  split_scaled + (1|site_a),
                                                 data = landscape_metrics,
                                                 ZZ = ZZ_landscape, 
                                                 REML = TRUE)
 
-landscape_metrics_second_REML <- modular_function(variables = RST ~ dist_scaled +
-                                                    mesh_scaled + split_scaled + 
+landscape_metrics_best_NO_REML <- modular_function(variables = RST ~ mesh_scaled +
+                                                     split_scaled + (1|site_a),
+                                                   data = landscape_metrics,
+                                                   ZZ = ZZ_landscape, 
+                                                   REML = FALSE)
+
+landscape_metrics_second_REML <- modular_function(variables = RST ~ split_scaled + 
                                                     (1|site_a),
                                                   data = landscape_metrics,
                                                   ZZ = ZZ_landscape, 
                                                   REML = TRUE)
 
-landscape_metrics_third_REML <- modular_function(variables = RST ~ dist_scaled +
-                                                    iji_scaled + mesh_scaled + 
+landscape_metrics_second_NO_REML <- modular_function(variables = RST ~ split_scaled +
+                                                       (1|site_a),
+                                                    data = landscape_metrics,
+                                                    ZZ = ZZ_landscape, 
+                                                    REML = FALSE)
+
+landscape_metrics_third_REML <- modular_function(variables = RST ~ iji_scaled + 
+                                                   mesh_scaled + split_scaled +
                                                    (1|site_a),
                                                  data = landscape_metrics,
                                                  ZZ = ZZ_landscape, 
                                                  REML = TRUE)
 
+landscape_metrics_third_NO_REML <- modular_function(variables = RST ~ iji_scaled + 
+                                                      mesh_scaled + split_scaled +
+                                                      (1|site_a),
+                                                    data = landscape_metrics,
+                                                    ZZ = ZZ_landscape, 
+                                                    REML = TRUE)
+
 # combine models to list
-landscape_metrics_models_list <- list(best = landscape_metrics_best_REML,
-                                      second = landscape_metrics_second_REML,
-                                      third = landscape_metrics_third_REML)
+landscape_metrics_models_list_REML <- list(best = landscape_metrics_best_REML,
+                                           second = landscape_metrics_second_REML,
+                                           third = landscape_metrics_third_REML)
+
+landscape_metrics_models_list_NO_REML <- list(best = landscape_metrics_best_NO_REML,
+                                              second = landscape_metrics_second_NO_REML,
+                                              third = landscape_metrics_third_NO_REML)
 
 # get model info
-info_landscape_metrics_REML <- get_model_info(model = landscape_metrics_models_list,
+info_landscape_metrics_REML <- get_model_info(model = landscape_metrics_models_list_REML,
                                               n = 136)
+
+info_landscape_metrics_NO_REML <- get_model_info(model = landscape_metrics_models_list_NO_REML,
+                                                 n = 136)
 
 #### Isolation by distance
 
@@ -306,10 +357,22 @@ ibd_model_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1),
                                    ZZ = ZZ_dist,
                                    REML = TRUE)
 
+ibd_model_NO_REML <- modular_function(variables = RST ~ dist_scaled + (1|site_1), 
+                                      data = rst,
+                                      ZZ = ZZ_dist,
+                                      REML = FALSE)
+
 # get model information 
 info_ibd_REML <- get_model_info(list(ibd = ibd_model_REML), n = 136)
+info_ibd_NO_REML <- get_model_info(list(ibd = ibd_model_NO_REML), n = 136)
+
 
 #### Compare all three models ####
 info_surface_metrics_REML
+info_surface_metrics_NO_REML
+
 info_landscape_metrics_REML
+info_landscape_metrics_NO_REML
+
 info_ibd_REML
+info_ibd_NO_REML
