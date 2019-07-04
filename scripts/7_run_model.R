@@ -315,7 +315,7 @@ landscape_metrics_third_NO_REML <- modular_function(variables = RST ~ iji_scaled
                                                       (1|site_a),
                                                     data = landscape_metrics,
                                                     ZZ = ZZ_landscape, 
-                                                    REML = TRUE)
+                                                    REML = FALSE)
 
 # combine models to list
 landscape_metrics_models_list_REML <- list(best = landscape_metrics_best_REML,
