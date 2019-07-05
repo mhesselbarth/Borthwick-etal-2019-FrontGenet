@@ -90,82 +90,92 @@ transition_conductance_surface <- gdistance::geoCorrection(x = transition_conduc
 # }
 
 # calculate least-cost distances
-# distance_least_cost <- gdistance::costDistance(x = transition_conductance_surface,
-#                                                fromCoords = sites)
+# distance_lcp <- gdistance::costDistance(x = transition_conductance_surface,
+#                                         fromCoords = sites)
 # 
 # # save results
-# helpeR::save_rds(object = distance_least_cost, 
+# helpeR::save_rds(object = distance_lcp, 
 #                  filename = "distance_least_cost.rds", 
 #                  path = "data/Output/", overwrite = FALSE)
 
 # read already computed data
-distance_least_cost <- readr::read_rds("data/Output/distance_least_cost.rds")
+distance_lcp <- readr::read_rds("data/Output/distance_least_cost.rds")
 
-distance_least_cost_df <- tibble::tibble(site_1 = site_ids$site_1, 
-                                         site_2 = site_ids$site_2, 
-                                         least_cost = as.numeric(distance_least_cost)) %>% 
+df_lcp <- tibble::tibble(site_1 = site_ids$site_1, 
+                         site_2 = site_ids$site_2, 
+                         least_cost = as.numeric(distance_lcp)) %>% 
+  dplyr::mutate(least_cost_scaled = as.numeric(scale(least_cost))) %>%
   dplyr::left_join(rst, by = c("site_1", "site_2"))
 
 # calculate resistance distances (this takes some time)
-# distance_resistance <- gdistance::commuteDistance(x = transition_conductance_surface,
-#                                                   coords = sites)
+# distance_res <- gdistance::commuteDistance(x = transition_conductance_surface,
+#                                            coords = sites)
 # 
 # # save results
-# helpeR::save_rds(object = distance_resistance, 
+# helpeR::save_rds(object = distance_res, 
 #                  filename = "distance_resistance.rds", 
 #                  path = "data/Output/", overwrite = FALSE)
 
 # read already computed data
-distance_resistance <- readr::read_rds("data/Output/distance_resistance.rds")
+distance_res <- readr::read_rds("data/Output/distance_resistance.rds")
 
 # save distances in tibble
-distance_resistance_df <- tibble::tibble(site_1 = site_ids$site_1, 
-                                         site_2 = site_ids$site_2,
-                                         resistance = as.numeric(distance_resistance)) %>% 
+df_res <- tibble::tibble(site_1 = site_ids$site_1,
+                         site_2 = site_ids$site_2,
+                         resistance = as.numeric(distance_res)) %>% 
+  dplyr::mutate(resistance_scaled = as.numeric(scale(resistance))) %>%
   dplyr::left_join(rst, by = c("site_1", "site_2"))
 
-# calculate correlation between distances
-distance_correlation <- cor(x = distance_least_cost_df$least_cost,
-                            y = distance_resistance_df$resistance,
-                            method = "spearman")
-
-plot(distance_least_cost_df$least_cost ~ distance_resistance_df$resistance)
+# # calculate correlation between distances
+# distance_correlation <- cor(x = df_lcp$least_cost,
+#                             y = df_res$resistance,
+#                             method = "spearman")
+# 
+# plot(df_lcp$least_cost ~ df_res$resistance)
 
 #### Run models #### 
 
 # least distance cost model
-# MH: I think we want REML = TRUE since we are not dredging the model
-modell_least_cost_REML <- modular_function(variables = RST ~ least_cost + (1|site_1), 
-                                           data = distance_least_cost_df,
-                                           ZZ = ZZ_matrix, 
-                                           REML = TRUE)
+model_dredge_lcp <- modular_function(response = "RST", 
+                                     explanatory = "least_cost", 
+                                     random = "(1|site_1)",
+                                     data = df_lcp,
+                                     ZZ = ZZ_matrix, 
+                                     REML = FALSE) %>% 
+  get_model_aic(n = 136) %>%
+  dplyr::bind_cols(model = 1, .)
 
-modell_least_cost_NO_REML <- modular_function(variables = RST ~ least_cost + (1|site_1), 
-                                              data = distance_least_cost_df,
-                                              ZZ = ZZ_matrix, 
-                                              REML = FALSE)
-
-# get model info
-info_least_cost <- get_model_info(list(REML = modell_least_cost_REML,
-                                       NO_REML = modell_least_cost_NO_REML), 
-                                  n = 136)
+r2_lcp <- modular_function(response = "RST", 
+                           explanatory = "least_cost",
+                           random = "(1|site_1)",
+                           data = df_lcp,
+                           ZZ = ZZ_matrix, 
+                           REML = TRUE) %>% 
+  get_model_r2() %>%
+  dplyr::bind_cols(model = 1, .)
 
 # resistance model
-modell_resistance_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
-                                           data = distance_resistance_df,
-                                           ZZ = ZZ_matrix,
-                                           REML = TRUE)
+model_dredge_res <- modular_function(response = "RST", 
+                                     explanatory = "resistance_scaled", 
+                                     random = "(1|site_1)",
+                                     data = df_res,
+                                     ZZ = ZZ_matrix,
+                                     REML = FALSE) %>%
+  get_model_aic(n = 136) %>%
+  dplyr::bind_cols(model = 1, .)
 
-modell_resistance_NO_REML <- modular_function(variables = RST ~ resistance + (1|site_1),
-                                              data = distance_resistance_df,
-                                              ZZ = ZZ_matrix,
-                                              REML = FALSE)
-
-# get model info
-info_resistance <- get_model_info(list(REML = modell_resistance_REML,
-                                       NO_REML = modell_resistance_NO_REML),
-                                  n = 136)
+r2_res <- modular_function(response = "RST", 
+                           explanatory = "resistance_scaled", 
+                           random = "(1|site_1)",
+                           data = df_res,
+                           ZZ = ZZ_matrix,
+                           REML = TRUE) %>%
+  get_model_r2() %>%
+  dplyr::bind_cols(model = 1, .)
 
 #### Compare all models ####
-info_least_cost
-info_resistance
+model_dredge_lcp
+model_dredge_res
+
+r2_lcp
+r2_res
