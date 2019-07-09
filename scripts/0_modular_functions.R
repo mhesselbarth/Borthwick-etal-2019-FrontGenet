@@ -1,16 +1,27 @@
 # model optimization function
-modular_function <- function(variables, data, REML = TRUE,
-                             ZZ = NULL, call = NULL) {
+modular_function <- function(response, explanatory, random,
+                             data, 
+                             REML = TRUE,
+                             ZZ = NULL, 
+                             verbose = TRUE) {
+  
+  model_formula <- as.formula(paste(paste(response, 
+                                          paste(explanatory, 
+                                                collapse = " + "), sep = " ~ "), 
+                                    random, sep = " + "))
+  
   
   # parse the data and formula
-  model <- lme4::lFormula(variables, data = data, REML = REML)
+  model <- lme4::lFormula(model_formula, data = data, REML = REML)
   
   if (!is.null(ZZ)) {
     
     # replace ZZ matrix
     model$reTrms$Zt <- ZZ
     
-    message("> Replaced 'model$reTrms$Zt <- ZZ'")
+    if (verbose) {  
+      message("> Replaced 'model$reTrms$Zt <- ZZ'")
+    }
   }
   
   # create the deviance function to be optimized
@@ -25,45 +36,30 @@ modular_function <- function(variables, data, REML = TRUE,
                           reTrms = model$reTrms,
                           fr = model$fr)
   
-  if (!is.null(call)) {
-    
-    # replace call for dredging
-    model@call <- call
-    
-    message("> Replaced 'model@call <- call'")
-    
-  }
-  
   return(model)
 }
 
-get_model_info <- function(model, n) {
+get_model_aic <- function(model, n) {
   
   # getting AIC and r2
   # should we use extractAIC here ?
-  information_criterion <- purrr::map_dfr(model, function(x) {
-    
-    ic <- tibble::tibble(AIC = AIC(x),
-                         BIC = BIC(x),
-                         log_like = attr(logLik(x), "df"))
-    
-    r2 <- MuMIn::r.squaredGLMM(x)
-    
-    ic <- dplyr::mutate(ic, 
-                        r2_marginal = r2[1, 1], 
-                        r2_conditional = r2[1, 2])
-  }, .id = "model")
+  information_criterion <- tibble::tibble(AIC = AIC(model),
+                                          BIC = BIC(model),
+                                          log_like = attr(logLik(model), "df"))
   
   # calculating corrected AICc and BICc and weights
   information_criterion <- dplyr::mutate(information_criterion,
                                          AICc = AIC + 2 * log_like *
-                                           (log_like + 1) / (n - log_like - 1),
-                                         AICc_ew = exp(-0.5 * (AICc - min(AICc))) /
-                                           sum(exp(-0.5 * (AICc - min(AICc)))),
-                                         BIC_ew = exp(-0.5 * (BIC - min(BIC))) /
-                                           sum(exp(-0.5 * (BIC - min(BIC)))))
+                                           (log_like + 1) / (n - log_like - 1))
   
   return(information_criterion)
+}
+
+get_model_r2 <- function(model) {
+  
+  r2 <- tibble::as_tibble(MuMIn::r.squaredGLMM(model))
+  
+  return(r2)
 }
 
 create_ZZ <- function(data, col_names = c("site_1", "site_2")) {
