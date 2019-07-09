@@ -14,4 +14,5 @@ df_AICc <- dplyr::bind_rows(
 # calculate AIC weights
 df_AICc <- dplyr::mutate(df_AICc, 
                          AICc_delta = AICc - min(AICc), 
-                         AIC_ew = exp(-0.5 * AICc_delta) / sum(AICc_delta))
+                         AIC_ew = exp(-0.5 * AICc_delta) / sum(AICc_delta)) %>%
+  dplyr::arrange(AICc)
