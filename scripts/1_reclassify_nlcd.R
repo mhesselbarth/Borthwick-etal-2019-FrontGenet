@@ -28,17 +28,29 @@ nlcd_reclassified <- nlcd
 # reclassify land-cover classes
 nlcd_reclassified[nlcd_reclassified %in% c(41, 42, 43)] <- 1 # forest habitat
 nlcd_reclassified[nlcd_reclassified %in% c(52, 71, 81)] <- 2 # complementary habitat
-nlcd_reclassified[!nlcd_reclassified %in% c(1, 2) & !is.na(nlcd_reclassified)] <- 3 # non-habitat
+nlcd_reclassified[!nlcd_reclassified %in% c(1, 2) & 
+                    !is.na(nlcd_reclassified)] <- 3 # non-habitat
+
+# using NA for non-habitat
+nlcd_reclassified_NA <- nlcd_reclassified
+nlcd_reclassified_NA[!nlcd_reclassified_NA %in% c(1, 2) & 
+                       !is.na(nlcd_reclassified_NA)] <- NA # non-habitat
 
 # convert values to factor
 nlcd_reclassified <- raster::ratify(nlcd_reclassified)
+nlcd_reclassified_NA <- raster::ratify(nlcd_reclassified_NA) # NA dataset
 
 # add classes of reclassification
 levels_nlcd_reclassified <- levels(nlcd_reclassified)[[1]]
 levels_nlcd_reclassified$class <- c("forest", "complementary", "non-habitat")
 
+# add classes of reclassification NA datset
+levels_nlcd_reclassified_NA <- levels(nlcd_reclassified_NA)[[1]]
+levels_nlcd_reclassified_NA$class <- c("forest", "complementary")
+
 # add RAT to raster
 levels(nlcd_reclassified) <- levels_nlcd_reclassified
+levels(nlcd_reclassified_NA) <- levels_nlcd_reclassified_NA # NA dataset
 
 # Save results
 helpeR::save_rds(object = nlcd, 
@@ -49,5 +61,11 @@ helpeR::save_rds(object = nlcd,
 # Save results
 helpeR::save_rds(object = nlcd_reclassified, 
                  filename = "nlcd_reclassified.rds", 
+                 path = paste0(getwd(), "/data/output"), 
+                 overwrite = FALSE)
+
+# Save results NA dataset
+helpeR::save_rds(object = nlcd_reclassified_NA, 
+                 filename = "nlcd_reclassified_NA.rds", 
                  path = paste0(getwd(), "/data/output"), 
                  overwrite = FALSE)
