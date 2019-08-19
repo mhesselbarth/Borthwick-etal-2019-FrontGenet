@@ -1,12 +1,13 @@
 ## README
 
-R scripts for Borthwick et al. (2019). Alternative quantifications of landscape complementarity to model gene flow in banded longhorn beetles [Typocerus v. velutinus (Olivier)]. Frontiers in Genetics.
+R scripts for Borthwick, R., de Flamingh, A., Hesselbarth, M.H.K., Parandhaman, A., Wagner, H.H., Abdel Moniem, H.E. 2019. *Alternative quantifications of landscape complementarity to model gene flow in banded longhorn beetles [Typocerus v. velutinus (Olivier)]*. Frontiers in Genetics (submitted).
 
-Data is available from the authors on request. Please be aware and acknowledge that the data was previously published: 
+Data is available in this repository (Git LFS), from the authors on request or at <https://datadryad.org/resource/doi:10.5061/dryad.g5065>. Please be aware and acknowledge that the data was previously published: 
 
-Abdel Moniem, H. E. M. et al. 2016. Landscape genetics of a pollinator longhorn beetle [ Typocerus v. velutinus (Olivier)] on a continuous habitat surface. - Mol. Ecol. 25: 5015–5028.
+  * Abdel Moniem, H. E. M. et al. 2016. Landscape genetics of a pollinator longhorn beetle [ Typocerus v. velutinus (Olivier)] on a continuous habitat surface. -
+  Mol. Ecol. 25: 5015–5028.
 
-Abdel Moniem, H. E. M. and Holland, J. D. 2013. Habitat connectivity for pollinator beetles using surface metrics. - Landsc. Ecol. 28: 1251–1267.
+  * Abdel Moniem, H. E. M. and Holland, J. D. 2013. Habitat connectivity for pollinator beetles using surface metrics. - Landsc. Ecol. 28: 1251–1267.
 
 #### Correspondance:
 
