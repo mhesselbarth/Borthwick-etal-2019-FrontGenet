@@ -1,4 +1,6 @@
-## README
+## Alternative quantifications of landscape complementarity to model gene flow in banded longhorn beetles [Typocerus v. velutinus (Olivier)]
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3369728.svg)](https://doi.org/10.5281/zenodo.3369728)
 
 R scripts for Borthwick, R., de Flamingh, A., Hesselbarth, M.H.K., Parandhaman, A., Wagner, H.H., Abdel Moniem, H.E. 2019. *Alternative quantifications of landscape complementarity to model gene flow in banded longhorn beetles [Typocerus v. velutinus (Olivier)]*. Frontiers in Genetics (submitted).
 
