@@ -1,4 +1,4 @@
-## Alternative quantifications of landscape complementarity to model gene flow in banded longhorn beetles [Typocerus v. velutinus (Olivier)]
+#### Alternative quantifications of landscape complementarity to model gene flow in banded longhorn beetles [Typocerus v. velutinus (Olivier)]
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3369728.svg)](https://doi.org/10.5281/zenodo.3369728)
 
@@ -11,7 +11,7 @@ Data is available in this repository (Git LFS), from the authors on request or a
 
   * Abdel Moniem, H. E. M. and Holland, J. D. 2013. Habitat connectivity for pollinator beetles using surface metrics. - Landsc. Ecol. 28: 1251–1267.
 
-#### Correspondance:
+**Correspondance:**
 
 Hesselbarth, M.H.K.: maximilian.hesselbarth@uni-goettingen.de
 
