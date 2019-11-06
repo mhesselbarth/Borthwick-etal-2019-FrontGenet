@@ -25,6 +25,8 @@ source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
 # load input layer
 nlcd_layer_NA <- readRDS(paste0(getwd(), "/data/Output/nlcd_reclassified_NA.rds"))
 
+# clippings_pmm_nlcd <- readRDS(paste0(getwd(), "/data/Output/clippings_pmm_nlcd.rds"))
+
 # load sampling points
 sampling_points <- raster::shapefile(paste0(getwd(), "/data/GIS/SSR_17_sites.shp"))
 
@@ -191,8 +193,8 @@ landscape_metrics_NA <- suppoRt::submit_to_cluster(fun = clip_and_calc,
                                                                    log_file = "lsm_clip.log",
                                                                    queue = "medium",
                                                                    service = "normal",
-                                                                   walltime = "24:00:00",
-                                                                   mem_cpu = "8192",
+                                                                   walltime = "06:00:00",
+                                                                   mem_cpu = "4096",
                                                                    processes = 1))
 
 suppoRt::save_rds(object = landscape_metrics_NA,
