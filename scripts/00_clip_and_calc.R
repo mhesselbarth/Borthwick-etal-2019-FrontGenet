@@ -64,7 +64,8 @@ clip_and_calc <- function(focal_plot, other_plot,
   result <- landscapemetrics::calculate_lsm(input_layer, verbose = FALSE, ...)
   
   # add site information
-  result <- dplyr::mutate(site_a = focal_plot, 
+  result <- dplyr::mutate(result, 
+                          site_a = focal_plot, 
                           site_b = other_plot, 
                           euclidean_distance = dist)
   
