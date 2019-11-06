@@ -7,7 +7,7 @@ library(MuMIn)
 library(usdm)
 
 # source modular functions
-source("scripts/0_modular_functions.R")
+source("scripts/00_modular_functions.R")
 
 #### Import distance
 
