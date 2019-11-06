@@ -1,6 +1,6 @@
 # load packages
 library(landscapemetrics)
-library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
+library(suppoRt) # devtools::install_github("mhesselbarth/suppoRt")
 library(tidyverse)
 
 # import data
@@ -53,21 +53,21 @@ dplyr::filter(correlation_landscape, value < 0.1 & value > -0.1)
 # Save plots
 overwrite <- FALSE
 
-# helpeR::save_ggplot(plot = ggplot_correlation_class, 
-#                               filename = "ggplot_correlation_class.png", 
-#                               path = paste0(getwd(), "/plots"), 
-#                               width = 35, height = 35, units = "cm",
-#                               overwrite = overwrite)
+# suppoRt::save_ggplot(plot = ggplot_correlation_class, 
+#                      filename = "ggplot_correlation_class.png", 
+#                      path = paste0(getwd(), "/plots"), 
+#                      width = 35, height = 35, units = "cm",
+#                      overwrite = overwrite)
 
-helpeR::save_ggplot(plot = ggplot_correlation_landscape, 
-                    filename = "ggplot_correlation_landscape.png", 
-                    path = paste0(getwd(), "/plots"), 
-                    width = 35, height = 35, units = "cm",
-                    overwrite = overwrite)
+suppoRt::save_ggplot(plot = ggplot_correlation_landscape, 
+                     filename = "ggplot_correlation_landscape.png", 
+                     path = paste0(getwd(), "/plots"), 
+                     width = 35, height = 35, units = "cm",
+                     overwrite = overwrite)
 
-helpeR::save_ggplot(plot = ggplot_correlation_landscape_filtered, 
-                    filename = "ggplot_correlation_landscape_filtered.png", 
-                    path = paste0(getwd(), "/plots"), 
-                    width = 35, height = 35, units = "cm",
-                    overwrite = overwrite)
+suppoRt::save_ggplot(plot = ggplot_correlation_landscape_filtered, 
+                     filename = "ggplot_correlation_landscape_filtered.png", 
+                     path = paste0(getwd(), "/plots"), 
+                     width = 35, height = 35, units = "cm",
+                     overwrite = overwrite)
 

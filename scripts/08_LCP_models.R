@@ -1,6 +1,6 @@
 #### load libraries ####
 library(gdistance)
-library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
+library(suppoRt) # devtools::install_github("mhesselbarth/suppoRt")
 library(lme4)
 library(MuMIn)
 library(raster)
@@ -27,8 +27,8 @@ conductance_surface <- raster::raster("data/GIS/tv_cond.tif")
 #### Pre-processing of data ####
 
 # create ids
-site_ids <- helpeR::expand_grid_unique(x = seq_along(sites), 
-                                       y = seq_along(sites)) %>%
+site_ids <- suppoRt::expand_grid_unique(x = seq_along(sites), 
+                                        y = seq_along(sites)) %>%
   as.data.frame() %>%
   tibble::as_tibble() %>% 
   purrr::set_names("site_1", "site_2")
@@ -94,9 +94,9 @@ transition_conductance_surface <- gdistance::geoCorrection(x = transition_conduc
 #                                         fromCoords = sites)
 # 
 # # save results
-# helpeR::save_rds(object = distance_lcp, 
-#                  filename = "distance_least_cost.rds", 
-#                  path = "data/Output/", overwrite = FALSE)
+# suppoRt::save_rds(object = distance_lcp, 
+#                   filename = "distance_least_cost.rds", 
+#                   path = "data/Output/", overwrite = FALSE)
 
 # read already computed data
 distance_lcp <- readr::read_rds("data/Output/distance_least_cost.rds")
@@ -112,9 +112,9 @@ df_lcp <- tibble::tibble(site_1 = site_ids$site_1,
 #                                            coords = sites)
 # 
 # # save results
-# helpeR::save_rds(object = distance_res, 
-#                  filename = "distance_resistance.rds", 
-#                  path = "data/Output/", overwrite = FALSE)
+# suppoRt::save_rds(object = distance_res, 
+#                   filename = "distance_resistance.rds", 
+#                   path = "data/Output/", overwrite = FALSE)
 
 # read already computed data
 distance_res <- readr::read_rds("data/Output/distance_resistance.rds")

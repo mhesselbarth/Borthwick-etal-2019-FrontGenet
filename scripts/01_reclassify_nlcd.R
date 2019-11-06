@@ -1,5 +1,5 @@
 library(gridExtra)
-library(helpeR) # devtools::install_github("mhesselbarth/helpeR") - only needed to save data
+library(suppoRt) # devtools::install_github("mhesselbarth/suppoRt") - only needed to save data
 library(raster)
 library(rasterVis)
 library(tidyverse)
@@ -53,19 +53,19 @@ levels(nlcd_reclassified) <- levels_nlcd_reclassified
 levels(nlcd_reclassified_NA) <- levels_nlcd_reclassified_NA # NA dataset
 
 # Save results
-helpeR::save_rds(object = nlcd, 
-                 filename = "nlcd.rds", 
-                 path = paste0(getwd(), "/data/output"), 
-                 overwrite = FALSE)
+suppoRt::save_rds(object = nlcd, 
+                  filename = "nlcd.rds", 
+                  path = paste0(getwd(), "/data/output"), 
+                  overwrite = FALSE)
 
 # Save results
-helpeR::save_rds(object = nlcd_reclassified, 
-                 filename = "nlcd_reclassified.rds", 
-                 path = paste0(getwd(), "/data/output"), 
-                 overwrite = FALSE)
+suppoRt::save_rds(object = nlcd_reclassified, 
+                  filename = "nlcd_reclassified.rds", 
+                  path = paste0(getwd(), "/data/output"), 
+                  overwrite = FALSE)
 
 # Save results NA dataset
-helpeR::save_rds(object = nlcd_reclassified_NA, 
-                 filename = "nlcd_reclassified_NA.rds", 
-                 path = paste0(getwd(), "/data/output"), 
-                 overwrite = FALSE)
+suppoRt::save_rds(object = nlcd_reclassified_NA, 
+                  filename = "nlcd_reclassified_NA.rds", 
+                  path = paste0(getwd(), "/data/output"), 
+                  overwrite = FALSE)

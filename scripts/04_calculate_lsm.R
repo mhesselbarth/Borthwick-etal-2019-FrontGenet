@@ -1,6 +1,6 @@
 # load libraries
 library(clustermq)
-library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
+library(suppoRt) # devtools::install_github("mhesselbarth/helpeR")
 library(landscapemetrics)
 library(raster)
 library(sp)
@@ -84,19 +84,19 @@ landscape_sub <- c("lsm_l_ai",
 # 
 # #### clustermq ####
 # Calculate metrics on high performance cluster
-# landscape_metrics <- helpeR::submit_to_cluster(fun = calculate_lsm_helper,
-#                                                landscape = clippings_pmm,
-#                                                const = list(what = landscape_sub,
-#                                                             classes_max = 3),
-#                                                n_jobs = length(clippings_pmm),
-#                                                template = list(queue = "fat",
-#                                                                walltime = "06:00:00",
-#                                                                processes = 1))
+# landscape_metrics <- suppoRt::submit_to_cluster(fun = calculate_lsm_helper,
+#                                                 landscape = clippings_pmm,
+#                                                 const = list(what = landscape_sub,
+#                                                              classes_max = 3),
+#                                                 n_jobs = length(clippings_pmm),
+#                                                 template = list(queue = "fat",
+#                                                                 walltime = "06:00:00",
+#                                                                 processes = 1))
 # 
-# helpeR::save_rds(object = landscape_metrics,
-#                  filename = "landscape_metrics_raw.rds",
-#                  path = paste0(getwd(), "/data/output"),
-#                  overwrite = TRUE)
+# suppoRt::save_rds(object = landscape_metrics,
+#                   filename = "landscape_metrics_raw.rds",
+#                   path = paste0(getwd(), "/data/output"),
+#                   overwrite = TRUE)
 # 
 # # Rowbind returning list and add site names
 # landscape_metrics <- dplyr::bind_rows(landscape_metrics, .id = "layer_bind_rows") %>%
@@ -124,10 +124,10 @@ landscape_sub <- c("lsm_l_ai",
 #   dplyr::arrange(site_a, site_b)
 # 
 # # Order and save results
-# helpeR::save_rds(object = landscape_metrics, 
-#                  filename = "landscape_metrics.rds", 
-#                  path = paste0(getwd(), "/data/output"), 
-#                  overwrite = FALSE)
+# suppoRt::save_rds(object = landscape_metrics, 
+#                   filename = "landscape_metrics.rds", 
+#                   path = paste0(getwd(), "/data/output"), 
+#                   overwrite = FALSE)
 # 
 # write.table(landscape_metrics,
 #             file = paste0(getwd(), '/data/output/landscape_metrics.csv'),
@@ -175,27 +175,27 @@ landscape_sub <- c("lsm_l_ai",
 #### clustermq (clip_and_calc) ####
 
 # get all combinations
-sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points),
-                                           y = seq_along(sampling_points))
+sampling_ids <- suppoRt::expand_grid_unique(x = seq_along(sampling_points),
+                                            y = seq_along(sampling_points))
 
 # run metrics
-landscape_metrics <- helpeR::submit_to_cluster(fun = clip_and_calc,
-                                               focal_plot = sampling_ids[, 1],
-                                               other_plot = sampling_ids[, 2],
-                                               const = list(sampling_points = sampling_points,
-                                                            input_layer = nlcd_layer,
-                                                            what = "landscape",
-                                                            classes_max = 3),
-                                               n_jobs = nrow(sampling_ids),
-                                               template = list(queue = "medium",
-                                                               walltime = "24:00:00",
-                                                               mem_cpu = "12G",
-                                                               processes = 1))
+landscape_metrics <- suppoRt::submit_to_cluster(fun = clip_and_calc,
+                                                focal_plot = sampling_ids[, 1],
+                                                other_plot = sampling_ids[, 2],
+                                                const = list(sampling_points = sampling_points,
+                                                             input_layer = nlcd_layer,
+                                                             what = "landscape",
+                                                             classes_max = 3),
+                                                n_jobs = nrow(sampling_ids),
+                                                template = list(queue = "medium",
+                                                                walltime = "24:00:00",
+                                                                mem_cpu = "12G",
+                                                                processes = 1))
 
-helpeR::save_rds(object = landscape_metrics,
-                 filename = "landscape_metrics_raw.rds",
-                 path = paste0(getwd(), "/data/Output"),
-                 overwrite = FALSE)
+suppoRt::save_rds(object = landscape_metrics,
+                  filename = "landscape_metrics_raw.rds",
+                  path = paste0(getwd(), "/data/Output"),
+                  overwrite = FALSE)
 
 # bind to one dataframe 
 landscape_metrics <- dplyr::bind_rows(landscape_metrics)
@@ -204,10 +204,10 @@ landscape_metrics <- dplyr::bind_rows(landscape_metrics)
 landscape_metrics$layer <- rep(x = 1:nrow(sampling_ids), 
                                each = length(unique(landscape_metrics$metric)))
 
-helpeR::save_rds(object = landscape_metrics,
-                 filename = "landscape_metrics.rds",
-                 path = paste0(getwd(), "/data/Output"),
-                 overwrite = FALSE)
+suppoRt::save_rds(object = landscape_metrics,
+                  filename = "landscape_metrics.rds",
+                  path = paste0(getwd(), "/data/Output"),
+                  overwrite = FALSE)
 
 #### FUTURE (clip and calc) ####
 
@@ -236,8 +236,8 @@ helpeR::save_rds(object = landscape_metrics,
 # # no max size of globals
 # options(future.globals.maxSize = Inf)
 # 
-# sampling_ids <- helpeR::expand_grid_unique(x = seq_along(sampling_points), 
-#                                            y = seq_along(sampling_points))
+# sampling_ids <- suppoRt::expand_grid_unique(x = seq_along(sampling_points), 
+#                                             y = seq_along(sampling_points))
 #                                            
 # landscape_metrics %<-% furrr::future_map2(sampling_ids[, 1], sampling_ids[, 2], 
 #                                           function(x, y) {

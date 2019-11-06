@@ -6,7 +6,7 @@
 ##############################################################
 
 library(purrr)      # mapping
-library(helpeR) # devtools::install_github("mhesselbarth/helpeR")
+library(suppoRt) # devtools::install_github("mhesselbarth/helpeR")
 library(maptools)   # read shape files
 library(PBSmapping) # make polygons
 library(raster)     # read raster files and clipping
@@ -418,7 +418,7 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
 
 clippings_flatten <- purrr::flatten(clippings)
 
-helpeR::save_rds(clippings_flatten, filename = "clippings_pmm_nlcd.rds", 
-                 path = paste0(getwd(), "/data/output"), 
-                 overwrite = FALSE)
+suppoRt::save_rds(clippings_flatten, filename = "clippings_pmm_nlcd.rds", 
+                  path = paste0(getwd(), "/data/output"), 
+                  overwrite = FALSE)
 
