@@ -314,11 +314,11 @@ lines(1:10000, y.minor, lty = 3)
 # Input data for clipping landscape. This is where we have to throw in 
 # our patch data forest vs non-forest
 
-# input_layer <- raster(paste0(getwd(), "/data/GIS/forest_300m_0_1.tif"))
-# input_layer[values(input_layer) < -999] <- NA
-input_layer <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified.rds"))
+# input_layer_NA <- raster(paste0(getwd(), "/data/GIS/forest_300m_0_1.tif"))
+# input_layer_NA[values(input_layer_NA) < -999] <- NA
+input_layer_NA <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified_NA.rds"))
 
-plot(input_layer)
+plot(input_layer_NA, col = viridis::viridis(n = 2))
 
 # Read sampling points
 #spoints <- readShapeSpatial(paste0(path, "/GIS_data/Sampling_points/sampling_points.shp"))
@@ -341,7 +341,7 @@ to_disk <- FALSE
 rasterOptions(todisk = to_disk)
 
 # Loop for all sampling points
-clippings <- purrr::map(1:length(id), function(focal_plot) {
+clippings_NA <- purrr::map(1:length(id), function(focal_plot) {
   
   cat(paste0("\r> Progress: ", focal_plot , " from ", length(id)))
   
@@ -395,8 +395,8 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
     # plot(Epolygon, add = TRUE)
     
     # Clipping Ellipse
-    # Emask   <- rasterize(Epolygon, input_layer)
-    Elands  <- crop(input_layer, Epolygon)
+    # Emask   <- rasterize(Epolygon, input_layer_NA)
+    Elands  <- crop(input_layer_NA, Epolygon)
     Elands <- mask(Elands, Epolygon) # Crop to extend of Emask
     
     if (!to_disk) {
@@ -414,9 +414,9 @@ clippings <- purrr::map(1:length(id), function(focal_plot) {
   return(result)
 })
 
-clippings_flatten <- purrr::flatten(clippings)
+clippings_flatten_NA <- purrr::flatten(clippings_NA)
 
-suppoRt::save_rds(clippings_flatten, filename = "clippings_pmm_nlcd.rds", 
+suppoRt::save_rds(clippings_flatten_NA, filename = "clippings_pmm_nlcd_NA.rds", 
                   path = paste0(getwd(), "/data/output"), 
                   overwrite = FALSE)
 

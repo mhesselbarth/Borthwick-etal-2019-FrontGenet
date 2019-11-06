@@ -23,7 +23,7 @@ source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
 # names_clippings <- stringr::str_split(names_clippings, pattern = "_", simplify = TRUE) # need for local version
 
 # load input layer
-nlcd_layer <- readRDS(paste0(getwd(), "/data/Output/nlcd_reclassified.rds"))
+nlcd_layer_NA <- readRDS(paste0(getwd(), "/data/Output/nlcd_reclassified_NA.rds"))
 
 # load sampling points
 sampling_points <- raster::shapefile(paste0(getwd(), "/data/GIS/SSR_17_sites.shp"))
@@ -179,33 +179,35 @@ sampling_ids <- suppoRt::expand_grid_unique(x = seq_along(sampling_points),
                                             y = seq_along(sampling_points))
 
 # run metrics
-landscape_metrics <- suppoRt::submit_to_cluster(fun = clip_and_calc,
-                                                focal_plot = sampling_ids[, 1],
-                                                other_plot = sampling_ids[, 2],
-                                                const = list(sampling_points = sampling_points,
-                                                             input_layer = nlcd_layer,
-                                                             what = "landscape",
-                                                             classes_max = 3),
-                                                n_jobs = nrow(sampling_ids),
-                                                template = list(queue = "medium",
-                                                                walltime = "24:00:00",
-                                                                mem_cpu = "12G",
-                                                                processes = 1))
+landscape_metrics_NA <- suppoRt::submit_to_cluster(fun = clip_and_calc,
+                                                   focal_plot = sampling_ids[, 1],
+                                                   other_plot = sampling_ids[, 2],
+                                                   const = list(sampling_points = sampling_points,
+                                                                input_layer = nlcd_layer_NA,
+                                                                what = "landscape",
+                                                                classes_max = 3),
+                                                   n_jobs = nrow(sampling_ids),
+                                                   template = list(job_name = "lsm_clip", 
+                                                                   queue = "medium",
+                                                                   service = "normal",
+                                                                   walltime = "24:00:00",
+                                                                   mem_cpu = "8192",
+                                                                   processes = 1))
 
-suppoRt::save_rds(object = landscape_metrics,
-                  filename = "landscape_metrics_raw.rds",
+suppoRt::save_rds(object = landscape_metrics_NA,
+                  filename = "landscape_metrics_NA_raw.rds",
                   path = paste0(getwd(), "/data/Output"),
                   overwrite = FALSE)
 
 # bind to one dataframe 
-landscape_metrics <- dplyr::bind_rows(landscape_metrics)
+landscape_metrics_NA <- dplyr::bind_rows(landscape_metrics_NA)
 
 # replace layer with 1:136
-landscape_metrics$layer <- rep(x = 1:nrow(sampling_ids), 
-                               each = length(unique(landscape_metrics$metric)))
+landscape_metrics_NA$layer <- rep(x = 1:nrow(sampling_ids), 
+                                  each = length(unique(landscape_metrics_NA$metric)))
 
-suppoRt::save_rds(object = landscape_metrics,
-                  filename = "landscape_metrics.rds",
+suppoRt::save_rds(object = landscape_metrics_NA,
+                  filename = "landscape_metrics_NA.rds",
                   path = paste0(getwd(), "/data/Output"),
                   overwrite = FALSE)
 
@@ -244,7 +246,7 @@ suppoRt::save_rds(object = landscape_metrics,
 #                                             clip_and_calc(focal_plot = x, 
 #                                                           other_plot = y, 
 #                                                           sampling_points = sampling_points,
-#                                                           input_layer = nlcd_layer, 
+#                                                           input_layer = nlcd_layer_NA, 
 #                                                           what = "landscape", 
 #                                                           classes_max = 3)})
 # 

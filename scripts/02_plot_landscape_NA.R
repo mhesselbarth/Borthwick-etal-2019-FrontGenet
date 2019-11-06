@@ -24,7 +24,7 @@ levels_nlcd <- dplyr::left_join(x = levels_nlcd, y = nlcd_color,
 levels(nlcd) <- levels_nlcd
 
 # import reclassified NLCD layer
-nlcd_reclassified <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified.rds"))
+nlcd_reclassified_NA <- readRDS(paste0(getwd(), "/data/output/nlcd_reclassified_NA.rds"))
 
 # import habitat surface
 habitat_surface <- raster::raster(paste0(getwd(), "/data/GIS/habitat_surface.tif"))
@@ -35,14 +35,14 @@ plot_nlcd <- rasterVis::levelplot(nlcd, main = "NLCD", att = "class",
   latticeExtra::layer(sp::sp.points(sampling_points, pch = 19, col = "black", size = 2))
 
 # plot reclassified NLCD
-plot_nlcd_reclassified <- rasterVis::levelplot(nlcd_reclassified, att = "class", 
-                                               col.regions = c("darkgreen", "greenyellow", "gray"),
-                                               main = "NLCD reclassified") + 
+plot_nlcd_reclassified_NA <- rasterVis::levelplot(nlcd_reclassified_NA, att = "class", 
+                                                  col.regions = c("darkgreen", "greenyellow", "gray"),
+                                                  main = "NLCD reclassified") + 
   latticeExtra::layer(sp::sp.points(sampling_points, pch = 19, col = "black", size = 2))
 
 # plot original vs reclassified NLCD
 plot_nlcd_overall <- gridExtra::grid.arrange(plot_nlcd, 
-                                             plot_nlcd_reclassified, ncol = 2)
+                                             plot_nlcd_reclassified_NA, ncol = 2)
 
 # plot habitat surface
 plot_surface <- rasterVis::levelplot(habitat_surface, main = "Surface metrics", 
@@ -50,5 +50,5 @@ plot_surface <- rasterVis::levelplot(habitat_surface, main = "Surface metrics",
   latticeExtra::layer(sp::sp.points(sampling_points, pch = 19, col = "black", size = 2))
 
 # plot habitat surface vs. reclassified NLCD``
-plot_surface_patch <- gridExtra::grid.arrange(plot_nlcd_reclassified, 
+plot_surface_patch <- gridExtra::grid.arrange(plot_nlcd_reclassified_NA, 
                                               plot_surface, ncol = 2)
