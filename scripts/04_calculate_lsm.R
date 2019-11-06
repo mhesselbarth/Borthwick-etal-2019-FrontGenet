@@ -6,8 +6,8 @@ library(raster)
 library(sp)
 library(tidyverse)
 
-source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
-source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
+source(paste0(getwd(), "/scripts/00_calculate_lsm_helper.R"))
+source(paste0(getwd(), "/scripts/00_clip_and_calc.R"))
 
 #### Load data ####
 

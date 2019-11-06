@@ -6,8 +6,8 @@ library(raster)
 library(sp)
 library(tidyverse)
 
-source(paste0(getwd(), "/scripts/0_calculate_lsm_helper.R"))
-source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
+source(paste0(getwd(), "/scripts/00_calculate_lsm_helper.R"))
+source(paste0(getwd(), "/scripts/00_clip_and_calc.R"))
 
 #### Load data ####
 
@@ -24,7 +24,6 @@ source(paste0(getwd(), "/scripts/0_clip_and_calc.R"))
 
 # load input layer
 nlcd_layer_NA <- readRDS(paste0(getwd(), "/data/Output/nlcd_reclassified_NA.rds"))
-
 # clippings_pmm_nlcd <- readRDS(paste0(getwd(), "/data/Output/clippings_pmm_nlcd.rds"))
 
 # load sampling points

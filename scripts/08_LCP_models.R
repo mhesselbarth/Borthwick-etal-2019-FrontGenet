@@ -8,7 +8,7 @@ library(spdep)
 library(tidyverse)
 
 # source modular functions
-source("scripts/0_modular_functions.R")
+source("scripts/00_modular_functions.R")
 
 #### load data ####
 
