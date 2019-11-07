@@ -61,7 +61,8 @@ clip_and_calc <- function(focal_plot, other_plot,
   # crop to extent of ellipsoid
   input_layer <- raster::mask(input_layer, ellipsoid) 
   
-  result <- landscapemetrics::calculate_lsm(input_layer, verbose = FALSE, ...)
+  result <- landscapemetrics::calculate_lsm(input_layer, progress = FALSE, verbose = FALSE, 
+                                            ...)
   
   # add site information
   result <- dplyr::mutate(result, 
