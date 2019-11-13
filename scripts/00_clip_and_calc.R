@@ -1,5 +1,19 @@
 clip_and_calc <- function(focal_plot, other_plot, 
-                          sampling_points, input_layer, ...) {
+                          sampling_points, 
+                          input_layer = NULL, path = NULL,
+                          ...) {
+  
+  # load input_layer on HPC if null
+  if (is.null(input_layer)) {
+    
+    # check if path is specified
+    if (is.null(path)) {
+      stop("Please provide path to input_layer.rds.", call. = FALSE)
+    }
+    
+    # load layer
+    input_layer <- readRDS(file = "") 
+  }
   
   # calculate distance matrix
   distance_matrix <- as.matrix(dist(sampling_points@coords, method = "euclidean", 
