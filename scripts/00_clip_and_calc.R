@@ -3,6 +3,8 @@ clip_and_calc <- function(focal_plot, other_plot,
                           input_layer = NULL, path = NULL,
                           ...) {
   
+  options(to_disk = TRUE)
+  
   # load input_layer on HPC if null
   if (is.null(input_layer)) {
     
@@ -12,7 +14,7 @@ clip_and_calc <- function(focal_plot, other_plot,
     }
     
     # load layer
-    input_layer <- readRDS(file = "") 
+    input_layer <- readRDS(file = path) 
   }
   
   # calculate distance matrix
