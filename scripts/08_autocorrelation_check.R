@@ -3,7 +3,7 @@
 ################################
 
 ## Install corMLPE from github
-devtools::install_github("nspope/corMLPE", force=T)
+devtools::install_github("nspope/corMLPE")
 
 ## Load corMLPE package
 library(corMLPE)
