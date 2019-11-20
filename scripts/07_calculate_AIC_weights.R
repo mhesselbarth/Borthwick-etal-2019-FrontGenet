@@ -4,16 +4,16 @@
 # have all required data in workspace
 
 # combine AICc into one df
-df_AICc <- dplyr::bind_rows(
-  dplyr::bind_cols(approach = "surface", AICc = model_dredge_surface$AICc[1]),
-  dplyr::bind_cols(approach = "lsm", AICc = model_dredge_lsm$AICc[1]),
-  dplyr::bind_cols(approach = "lsm_NA", AICc = model_dredge_lsm_NA$AICc[1]),
-  dplyr::bind_cols(approach = "ibd", AICc = model_dredge_ibd$AICc[1]),
-  dplyr::bind_cols(approach = "lcp", AICc = model_dredge_lcp$AICc[1]),
-  dplyr::bind_cols(approach = "res", AICc = model_dredge_res$AICc[1]))
+df_AIC <- dplyr::bind_rows(
+  dplyr::bind_cols(approach = "surface", AIC = model_dredge_surface$AIC[1]),
+  dplyr::bind_cols(approach = "lsm", AIC = model_dredge_lsm$AIC[1]),
+  dplyr::bind_cols(approach = "lsm_NA", AIC = model_dredge_lsm_NA$AIC[1]),
+  dplyr::bind_cols(approach = "ibd", AIC = model_dredge_ibd$AIC[1]),
+  dplyr::bind_cols(approach = "lcp", AIC = model_dredge_lcp$AIC[1]),
+  dplyr::bind_cols(approach = "res", AIC = model_dredge_res$AIC[1]))
 
 # calculate AIC weights
-df_AICc <- dplyr::mutate(df_AICc, 
-                         AICc_delta = AICc - min(AICc), 
-                         AIC_ew = exp(-0.5 * AICc_delta) / sum(AICc_delta)) %>%
-  dplyr::arrange(AICc)
+df_AIC <- dplyr::mutate(df_AIC, 
+                        AIC_delta = AIC - min(AIC), 
+                        AIC_ew = exp(-0.5 * AIC_delta) / sum(AIC_delta)) %>%
+  dplyr::arrange(AIC)
