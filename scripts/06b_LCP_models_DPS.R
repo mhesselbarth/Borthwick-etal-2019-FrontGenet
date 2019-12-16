@@ -15,8 +15,6 @@ source("scripts/00_modular_functions.R")
 # habitat surface
 habitat_surface <- raster::raster("data/GIS/Habitat_surface.tif")
 
-# ensure DPS is in workspace somewhere
-
 # sample locations
 sites <- raster::shapefile("data/GIS/SSR_17_sites.shp")
 
