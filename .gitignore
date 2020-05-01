@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+data/GIS/**
+data/Output/**
